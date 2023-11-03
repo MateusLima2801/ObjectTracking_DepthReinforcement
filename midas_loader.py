@@ -45,10 +45,11 @@ class Midas:
                 align_corners=False,
             ).squeeze()
 
-        depth_array = prediction.cpu().numpy()
+        depth_array = prediction.cpu().numpy().tolist()
+        data = { "depth_matrix": depth_array}
         os.makedirs(output_array_folder, exist_ok = True)
         # Convert the Python array to a JSON-serializable format
-        json_obj = json.dumps(depth_array)
+        json_obj = json.dumps(data)
 
         # Save the JSON data to a file
         with open(output_array_path, 'w') as json_file:
