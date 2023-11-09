@@ -3,7 +3,6 @@ import torch
 import matplotlib.pyplot as plt
 import os
 from progress.bar import Bar
-import json
 
 class Midas:
     def __init__(self):
@@ -21,15 +20,24 @@ class Midas:
             self.transform = self.midas_transforms.small_transform
 
     def transform_img(self, input_path: str, output_folder: str):
+        depth_array = self.get_depth_array(input_path)
+        filename = os.path.split(input_path)[1]
+        output_path = os.path.join(output_folder,filename)
+        os.makedirs(output_folder, exist_ok = True)
+        plt.imsave(output_path, depth_array)
+    
+    def transform_imgs_from_folder(self, input_folder: str, output_folder: str):
+        img_files = os.listdir(input_folder)
+        with Bar(max = len(img_files), suffix='%(percent).1f%% - %(eta)ds') as bar:
+            for img_file in img_files:
+                img_path = os.path.join(input_folder, img_file)
+                self.transform_img(img_path, output_folder)
+                bar.next()
+
+    def get_depth_array(self, input_path: str):
         if os.path.isfile(input_path) == False: 
             raise Exception("Wrong input format")
-        filename = os.path.split(input_path)[1]
-        output_img_folder = os.path.join(output_folder,'img')
-        output_array_folder = os.path.join(output_folder,'array')
-        output_img_path = os.path.join(output_img_folder,filename)
-        json_filename = f'{filename.split(".")[0]}.json '
-        output_array_path = os.path.join(output_array_folder, json_filename)
-
+        
         img = cv2.imread(input_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -45,25 +53,5 @@ class Midas:
                 align_corners=False,
             ).squeeze()
 
-        depth_array = prediction.cpu().numpy().tolist()
-        data = { "depth_matrix": depth_array}
-        os.makedirs(output_array_folder, exist_ok = True)
-        # Convert the Python array to a JSON-serializable format
-        json_obj = json.dumps(data)
-
-        # Save the JSON data to a file
-        with open(output_array_path, 'w') as json_file:
-            json_file.write(json_obj)
-
-        os.makedirs(output_img_folder, exist_ok = True)
-        plt.imsave(output_img_path, depth_array)
-    
-    def transform_imgs_from_folder(self, input_folder: str, output_folder: str):
-        img_files = os.listdir(input_folder)
-        with Bar(max = len(img_files), suffix='%(percent).1f%% - %(eta)ds') as bar:
-            for img_file in img_files:
-                img_path = os.path.join(input_folder, img_file)
-                self.transform_img(img_path, output_folder)
-                bar.next()
-
-    
+        depth_array = prediction.cpu().numpy()
+        return depth_array
