@@ -1,4 +1,5 @@
 from midas_loader import Midas
+from detect import Detector
 
 def main():
     midas = Midas()
