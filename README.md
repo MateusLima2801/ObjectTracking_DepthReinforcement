@@ -8,7 +8,7 @@
 
    1. Use detection or segmentation to extract object from frame
       1. Detection (done)
-   2. Extract depth from center or centroid of the object
+   2. Extract depth (features) from center or centroid of the object
    3. Replace depth's object for center depth
    4. Save image
    5. Apply feature extraction over frame
@@ -21,5 +21,8 @@
 
 ## Tasks
 
-- Find a time with Nacim for explaining repo code
-- Read labels from segmented images as find its centroid
+= Develop single object tracking based in feature matching
+
+- method generate_cost_matrix(self, detections1, detections2)
+- Hungarian Matching(done)
+- Meeting with Lepetit: try to inspect few images at first
