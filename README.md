@@ -23,6 +23,7 @@
 
 = Develop single object tracking based in feature matching
 
-- method generate_cost_matrix(self, detections1, detections2)
+- apply hungarian matching to cropped images
+- extracting cropped detection masks(done)
 - Hungarian Matching(done)
 - Meeting with Lepetit: try to inspect few images at first

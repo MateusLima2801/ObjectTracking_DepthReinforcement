@@ -4,7 +4,7 @@ from utils import *
 
 class Detector():
     def __init__(self):
-        self.midas = Midas()
+        # self.midas = Midas()
         self.model_label = {"detection": "yolov8n.pt", "segmentation": "yolov8n-seg.pt"}
 
     def detect(self, source: str,  conf: float=0.3):
@@ -16,8 +16,7 @@ class Detector():
         #model.predict(source='data/image1.jpg', save=True, conf=0.8, save_txt=True)
         #model.predict(source='data/image1.jpg', save=True, conf=0.5, save_crop=True)
         #model.predict(source='data/image1.jpg', save=True, conf=0.5, hide_labels=True, hide_conf = True)
-        prediction = model.predict(source=source, show = True, conf = conf, save_txt=True, hide_labels=True, save_conf=True)
-
+        prediction = model.predict(source=source, conf = conf, save = True, save_txt=True, hide_labels=True, save_conf=True)
         #model.export(format="onnx")
 
     def detect_and_read_labels(self,source: str, conf: float=0.3) -> dict:
@@ -25,7 +24,7 @@ class Detector():
         self.detect(source, conf)
         return self.read_labels_from('runs/detect/predict')
         
-    def read_labels_from(source) -> dict:
+    def read_labels_from(self, source) -> dict:
         path = os.path.join(source, 'labels')
         files = os.listdir(path)
         labels_by_file = {}
@@ -66,7 +65,8 @@ class Detector():
 
 
 # det = Detector()
-# det.detect('data/test/img0000001.jpg', conf=0.2)
-labels = Detector.read_labels_from('runs/detect/predict5')
-print(labels)
+# r = det.detect('data/test/img0000001.jpg', conf=0.2)
+# print(r)
+# labels = Detector.read_labels_from('runs/detect/predict5')
+# print(labels)
 #det.retrieve_depth('data/test/dog.jpg', 'runs/detect/predict3/labels/dog.')

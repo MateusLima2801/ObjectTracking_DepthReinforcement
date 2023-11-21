@@ -1,7 +1,9 @@
 import os
+import shutil
+import matplotlib.pyplot as plt
 
 def get_number_from_filename(filename):
-    name = filename.split('.')[0]
+    name = filename.split('.')[0][3:]
     n = int(name)
     return n
 
@@ -11,7 +13,11 @@ def get_filenames_from(imgs_folder, extension):
     return images
 
 def delete_folder(folder: str):
-    os.removedirs(folder)
+    if os.path.isdir(folder):
+        shutil.rmtree(folder)
 
 def cast_list(test_list, data_type):
         return list(map(data_type, test_list))
+
+def get_img_from_file(source):
+    return plt.imread(source)
