@@ -23,15 +23,17 @@
 
 = Develop single object tracking based in feature matching
 
-- adapt cifar siamese network to this project,
-  - train in crops (?): need to label the data
-  - train in car-people-truck labeled data: find it
-- generate similarity matrix for cropped images:
-  -SIFT
-  -siamese network (preferred)
-- apply hungarian matching to cropped images
+- generate similarity matrix for cropped images:(done)
+  - SURF - SIFT optimized
+    -SIFT (preferred) (done)
+    -siamese network (need of training the nn)
+- apply hungarian matching to cropped images (done)
 - extracting cropped detection masks(done)
 - Hungarian Matching(done)
 - Meeting with Lepetit: try to inspect few images at first
 - Optical flow solves occlusion problem, not applying it is bad
-  s
+- use Lowe ratio test to ensure that the best match is distinguished enough of the second match (done)
+- create a video with the matches:
+  - track bboxes with a dictionary with key = id and value = label - the dict changes each iteration and it's used in runtime
+    (done)
+  - adapt method which create videos
