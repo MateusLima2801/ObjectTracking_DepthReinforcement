@@ -23,13 +23,14 @@ class Hungarian_Matching():
         x, y = features1, features2
         y = y / np.linalg.norm(y, axis=1, keepdims=True)
         x = x / np.linalg.norm(x, axis=1, keepdims=True)
-        scores = np.einsum("nc,mc->nm", x, y)
+        scores = np.einsum("ncb,mcb->nmb", x, y)
 
-        n_x, _ = scores.shape
-        matching = -1 * np.ones(n_x, dtype=np.int32)
+        n_x, n_y, _ = scores.shape
+        matching = -1 * np.ones((n_x, n_y), dtype=np.int32)
 
         # hungarian method
-        row_ind, col_ind = opt.linear_sum_assignment(-scores)
+        #row_ind, col_ind
+        a = opt.linear_sum_assignment(-scores)
 
         for (i, j) in zip(row_ind, col_ind):
             if scores[i, j] > 0* 1.4 * np.median(scores):

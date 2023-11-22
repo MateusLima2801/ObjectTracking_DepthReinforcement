@@ -55,3 +55,5 @@ class Midas:
 
         depth_array = prediction.cpu().numpy()
         return depth_array
+    
+

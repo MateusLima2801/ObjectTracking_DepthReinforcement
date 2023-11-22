@@ -65,7 +65,8 @@ class Detector():
 
 
 # det = Detector()
-# r = det.detect('data/test/img0000001.jpg', conf=0.2)
+# det.detect('data/test/img0000001.jpg', conf=0.2)
+# det.detect('data/test/img0000014.jpg', conf=0.2)
 # print(r)
 # labels = Detector.read_labels_from('runs/detect/predict5')
 # print(labels)
