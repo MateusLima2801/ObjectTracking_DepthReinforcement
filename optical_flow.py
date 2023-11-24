@@ -8,27 +8,6 @@ def get_number_from_filename(filename):
     n = int(name)
     return n
 
-def turn_imgs_into_video(imgs_folder, video_path):
-    images = [img for img in os.listdir(imgs_folder) if img.endswith(".jpeg")]
-    images.sort(key=get_number_from_filename)
-    frame = cv.imread(os.path.join(imgs_folder, images[0]))
-    height, width, layers = frame.shape
-
-    fourcc = 0
-    fps = 20.0
-    video = cv.VideoWriter(video_path, fourcc, fps, (width,height))
-
-    for image in images:
-        video.write(cv.imread(os.path.join(imgs_folder, image)))
-    video.release()
-    delete_files(imgs_folder, images)
-
-def delete_files(folder_path, filenames):
-    for name in filenames:
-        path = os.path.join(folder_path, name)
-        os.remove(path)
-
-
 cap = cv.VideoCapture('data/optical_flow/road2.mp4')
 
 # params for ShiTomasi corner detection

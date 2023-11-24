@@ -1,11 +1,11 @@
 from detector import Detector
 from features import Hungarian_Matching, Frame
-import utils
+import src.utils as utils
 import os
 import cv2 as cv
-import math
+from src.frame import Frame
 
-FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
+FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000016_00000_s'
 
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
@@ -18,32 +18,40 @@ class Tracker:
 
     def track(self):
         lf: Frame = None
-        bboxes: dict = {}
+        
         self.create_output_folder()
-        for name in self.img_names[:2]:
+        for name in self.img_names:
             img_path = self.get_img_path(name)
             img = self.get_img_tensor(name)
-            detection_labels = self.detector.detect_and_read_labels(img_path)
+            detection_labels = self.detector.detect_and_read_labels(img_path, conf=0.15)
+            if len(detection_labels) == 0: continue
             cf = Frame(img, detection_labels[name.split('.')[0]])
             cf.crop_masks()
             #cf.show_masks()
             
             if lf == None:
-                i = 0
-                for label in cf.labels:
-                    bboxes[i] = label
-                    i+=1
-                self.save_frame_and_bboxes_with_id(bboxes, img, name)
+                for i in range(len(cf.bboxes)):
+                    cf.bboxes[i].id = i
+                self.save_frame_and_bboxes_with_id(cf.bboxes, img, name)
                 lf = cf
                 continue
 
-            matching = self.matcher.match(lf.masks,cf.masks)
+            matching = self.matcher.match(lf,cf)
             print(matching)
+            # if matching == -1: doesn't have a match
             for i in range(len(matching)):
-                bboxes[i] = cf.labels[matching[i]]
-            self.save_frame_and_bboxes_with_id(bboxes, img, name)
+                if matching[i] >=0 :
+                    cf.bboxes[matching[i]].id = lf.bboxes[i].id
+            free_id = max(list(map(lambda x: x.id, cf.bboxes))) + 1
+            for i in range(len(cf.bboxes)):
+                if cf.bboxes[i].id == -1:
+                    cf.bboxes[i].id = free_id
+                    free_id +=1
+
+            self.save_frame_and_bboxes_with_id(cf.bboxes, img, name)
             lf = cf
-    
+        utils.turn_imgs_into_video(self.output_folder, self.output_folder.split('/')[-1], delete_imgs=False)
+
     def create_output_folder(self):
         folder = self.source_folder.split("/")[-1]+"_0"
         self.output_folder = os.path.join("data/track", folder)
@@ -54,16 +62,15 @@ class Tracker:
             if 10 ** dig_len <= i: dig_len+=1
         os.makedirs(self.output_folder, exist_ok = True)
 
-    def save_frame_and_bboxes_with_id(self, bboxes: dict, img, name: str):
-        for id, label in bboxes.items():
-            x,y,w,h = utils.get_bbox_dimensions(img, label)
-            x0, y0 = int(x-w/2), int(y-h/2)
-            x1, y1 = int(x+w/2), int(y+h/2)
+    def save_frame_and_bboxes_with_id(self, bboxes: list, img, name: str):
+        for bb in bboxes:
+            x0, y0 = int(bb.x-bb.w/2), int(bb.y-bb.h/2)
+            x1, y1 = int(bb.x+bb.w/2), int(bb.y+bb.h/2)
             cv.rectangle(img, (x0,y0), (x1,y1), color=(255,255,0), thickness=2)
             
             cv.putText(
                 img,
-                f'Id: {id}',
+                f'Id: {bb.id}',
                 (x0, y0 - 10),
                 fontFace = cv.FONT_HERSHEY_SIMPLEX,
                 fontScale = 0.6,

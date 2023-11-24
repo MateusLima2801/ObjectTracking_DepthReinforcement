@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 from midas_loader import Midas
-from utils import *
+from src.utils import *
 
 class Detector():
     def __init__(self):
@@ -65,7 +65,7 @@ class Detector():
 
 
 # det = Detector()
-# det.detect('data/test/img0000001.jpg', conf=0.2)
+# det.detect('data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s/img0000106.jpg', conf=0.1)
 # det.detect('data/test/img0000014.jpg', conf=0.2)
 # print(r)
 # labels = Detector.read_labels_from('runs/detect/predict5')

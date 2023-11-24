@@ -6,7 +6,7 @@
 
 1. Develop object tracking algorithm based on features similarities comparison with depth only
 
-   1. Use detection or segmentation to extract object from frame
+   1. Use detection or segmentation to extract object from frame (done)
       1. Detection (done)
    2. Extract depth (features) from center or centroid of the object
    3. Replace depth's object for center depth
@@ -30,10 +30,18 @@
 - apply hungarian matching to cropped images (done)
 - extracting cropped detection masks(done)
 - Hungarian Matching(done)
-- Meeting with Lepetit: try to inspect few images at first
 - Optical flow solves occlusion problem, not applying it is bad
 - use Lowe ratio test to ensure that the best match is distinguished enough of the second match (done)
-- create a video with the matches:
+- create a video with the matches (done):
   - track bboxes with a dictionary with key = id and value = label - the dict changes each iteration and it's used in runtime
     (done)
-  - adapt method which create videos
+  - adapt method which create videos(done)
+- solve overlap bbox problem (how?)
+- add depth
+
+## Problems
+
+- When an object goes out of the image, it has less features for doing the pairing. A solve would be apply the position metric to the cost_matrix
+- Occlusion. A solve would be apply optical flow
+- Overlapping bounding boxes
+- bboxes should be an attribute of the frame, although it will leave residues of old bboxes in the frames
