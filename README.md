@@ -36,12 +36,13 @@
   - track bboxes with a dictionary with key = id and value = label - the dict changes each iteration and it's used in runtime
     (done)
   - adapt method which create videos(done)
-- solve overlap bbox problem (how?)
+- solve overlap bbox problem (non maximum suppression)
 - add depth
+- IDEA: apply evaluation metric (iou - a lot of work, need to annotate the frames ground truth) and train the weights over the cost_matrixes over VisDroneDataSet
 
 ## Problems
 
 - When an object goes out of the image, it has less features for doing the pairing. A solve would be apply the position metric to the cost_matrix
 - Occlusion. A solve would be apply optical flow
-- Overlapping bounding boxes
-- bboxes should be an attribute of the frame, although it will leave residues of old bboxes in the frames
+- Overlapping bounding boxes (it's worse in human crowd videos)
+- bboxes should be an attribute of the frame, otherwise it will leave residues of old bboxes in the frames (solved)

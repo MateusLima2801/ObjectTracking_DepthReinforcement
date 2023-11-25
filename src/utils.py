@@ -29,18 +29,23 @@ def get_bbox_dimensions(img, label):
     x,y,w,h = [int(label[1]*W), int(label[2]*H), int(label[3]*W), int(label[4]*H)]
     return x,y,w,h
 
-# treat video file override
 def turn_imgs_into_video(imgs_folder, video_filename:str, img_extension = "jpg", output_folder = 'data/track_video', delete_imgs: bool = False):
     images = [img for img in os.listdir(imgs_folder) if img.endswith(f'.{img_extension}')]
     images.sort(key=get_number_from_filename)
     frame = cv.imread(os.path.join(imgs_folder, images[0]))
     height, width, layers = frame.shape
+
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
-
+    
     fourcc = 0
     fps = 20.0
     video_path = os.path.join(output_folder, f'{video_filename}.avi')
+    while os.path.isfile(video_path):
+        path = video_path.split('.')
+        info = path[0].split('_')
+        info[-1] = str(int(info[-1])+1)
+        video_path = '.'.join(['_'.join(info), path[1]])
     video = cv.VideoWriter(video_path, fourcc, fps, (width,height))
 
     for image in images:
@@ -62,3 +67,4 @@ def normalize_array(array: np.ndarray):
         return array / np.min(array)
     else:
         return (array - np.min(array)) / (np.max(array) - np.min(array))
+

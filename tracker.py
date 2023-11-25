@@ -5,7 +5,7 @@ import os
 import cv2 as cv
 from src.frame import Frame
 
-FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000016_00000_s'
+FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
 
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
@@ -87,5 +87,7 @@ class Tracker:
         return os.path.join(self.source_folder, name)
 
 
-t = Tracker(FRAMES_FOLDER)
-t.track()
+# t = Tracker(FRAMES_FOLDER)
+# t.track()
+
+utils.turn_imgs_into_video('data/track/uav0000003_00000_s_1','uav0000003_00000_s_1')
