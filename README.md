@@ -39,10 +39,12 @@
 - solve overlap bbox problem (non maximum suppression)
 - add depth
 - IDEA: apply evaluation metric (iou - a lot of work, need to annotate the frames ground truth) and train the weights over the cost_matrixes over VisDroneDataSet
+- compress track frames at end of tracking
 
 ## Problems
 
 - When an object goes out of the image, it has less features for doing the pairing. A solve would be apply the position metric to the cost_matrix
 - Occlusion. A solve would be apply optical flow
-- Overlapping bounding boxes (it's worse in human crowd videos)
+- Overlapping bounding boxes (it's worse in human crowd videos) (solved with NMS)
 - bboxes should be an attribute of the frame, otherwise it will leave residues of old bboxes in the frames (solved)
+- NMS should consider the estimated direction of the velocity and features of mask prediction (after it will have a virtual one created with optical flow ) so in crossing or ultrapassing the detection wouldn't be pruned

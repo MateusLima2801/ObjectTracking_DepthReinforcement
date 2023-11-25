@@ -16,7 +16,7 @@ class Detector():
         #model.predict(source='data/image1.jpg', save=True, conf=0.8, save_txt=True)
         #model.predict(source='data/image1.jpg', save=True, conf=0.5, save_crop=True)
         #model.predict(source='data/image1.jpg', save=True, conf=0.5, hide_labels=True, hide_conf = True)
-        prediction = model.predict(source=source, conf = conf, save = True, save_txt=True, hide_labels=True, save_conf=True)
+        prediction = model.predict(source=source, conf = conf, save = True, save_txt=True, save_conf=True)
         #model.export(format="onnx")
 
     def detect_and_read_labels(self,source: str, conf: float=0.3) -> dict:
