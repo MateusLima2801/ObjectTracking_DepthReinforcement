@@ -71,7 +71,9 @@ class Frame():
                 iou = keep[-1].get_intersection_over_union(self.bboxes[i])
                 if iou > Frame.THRESHOLD_IOU:
                     rem.append(i)
+            rem.reverse()
             for i in rem:
                 self.bboxes.pop(i)
             rem.clear()
         self.bboxes = keep
+

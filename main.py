@@ -3,7 +3,8 @@ from detector import Detector
 from tracker import Tracker
 
 def main():
-    FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000080_01680_s'
+    FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000076_00241_s'
+    exit(0)
     t = Tracker(FRAMES_FOLDER)
     t.track()
     exit(0)
