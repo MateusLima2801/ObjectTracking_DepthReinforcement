@@ -5,8 +5,6 @@ from src.midas_loader import Midas
 import src.utils as utils
 import os
 
-FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
-
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
     def __init__(self, matcher: Hungarian_Matching, midas: Midas):
@@ -27,6 +25,7 @@ class Tracker:
             img = Tracker.get_img_tensor(source_folder, name)
             detection_labels = Detector.detect_and_read_labels(img_path, conf=0.15)
             if len(detection_labels) == 0: continue
+            # self.midas
             cf = Frame(img, detection_labels[name.split('.')[0]])
             cf.apply_parallel_non_max_suppression()
             #print(f"Mean suppression time ({i}): {tt/i}s")

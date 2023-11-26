@@ -53,10 +53,11 @@
     (done)
   - adapt method which create videos(done)
 - solve overlap bbox problem (non maximum suppression) (done)
-- add depth
+- add center depth ( )
 - IDEA: apply evaluation metric (iou - a lot of work, need to annotate the frames ground truth) and train the weights over the cost_matrixes over VisDroneDataSet
 - compress track frames at end of tracking
 - apply Parallel NMS(0.6ms) instead of NMS (137ms) (done)
+- send results ( )
 
 ## Problems
 

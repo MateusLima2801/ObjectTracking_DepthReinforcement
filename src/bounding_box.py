@@ -3,7 +3,7 @@ import numpy as np
 
 class BoundingBox():
     
-    def __init__(self, x: float, y:float, w:float, h:float, conf:float, depth: float):
+    def __init__(self, x: float, y:float, w:float, h:float, conf:float, depth: float = 0):
         self.x = x #x_centroid
         self.y = y #y_centroid
         self.w = w #width
