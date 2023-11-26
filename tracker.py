@@ -36,7 +36,7 @@ class Tracker:
                 continue
 
             matching = self.matcher.match(lf,cf)
-            print(matching)
+            #print(matching)
             # if matching == -1: doesn't have a match
             for i in range(len(matching)):
                 if matching[i] >=0 :
@@ -49,7 +49,7 @@ class Tracker:
 
             cf.save_frame_and_bboxes_with_id(os.path.join(self.output_folder, name))
             lf = cf
-        utils.turn_imgs_into_video(self.output_folder, self.output_folder.split('/')[-1], delete_imgs=False, fps=10)
+        utils.turn_imgs_into_video(self.output_folder, self.output_folder.split('/')[-1], delete_imgs=True, fps=10)
 
     def create_output_folder(self):
         folder = self.source_folder.split("/")[-1]+"_0"
@@ -68,7 +68,7 @@ class Tracker:
     def get_img_path(self, name):
         return os.path.join(self.source_folder, name)
 
-
-t = Tracker(FRAMES_FOLDER)
-t.track()
-exit()
+# FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
+# t = Tracker(FRAMES_FOLDER)
+# t.track()
+# exit(0)

@@ -1,5 +1,5 @@
 from ultralytics import YOLO
-from midas_loader import Midas
+from deprecated.midas_loader import Midas
 
 class Segmentor():
     def __init__(self):

@@ -1,9 +1,13 @@
-from midas_loader import Midas
+from deprecated.midas_loader import Midas
 from detector import Detector
-
+from tracker import Tracker
 def main():
-    midas = Midas()
-    midas.transform_img('data/test/img0000001.jpg', 'data/depth/test')
+    FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
+    t = Tracker(FRAMES_FOLDER)
+    t.track()
+    exit(0)
+    #midas = Midas()
+    #midas.transform_img('data/test/img0000001.jpg', 'data/depth/test')
     #midas.transform_imgs_from_folder('data/test', 'data/depth/test')
 
 if __name__ == "__main__":

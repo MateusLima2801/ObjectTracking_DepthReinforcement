@@ -40,7 +40,7 @@ def turn_imgs_into_video(imgs_folder, video_filename:str, img_extension = "jpg",
         os.mkdir(output_folder)
     
     fourcc = 0
-    video_path = os.path.join(output_folder, f'{video_filename}.mp4')
+    video_path = os.path.join(output_folder, f'{video_filename}.avi')
     while os.path.isfile(video_path):
         path = video_path.split('.')
         info = path[0].split('_')
@@ -56,7 +56,7 @@ def turn_imgs_into_video(imgs_folder, video_filename:str, img_extension = "jpg",
     if delete_imgs:
         delete_files(imgs_folder, images)
         if len(os.listdir(imgs_folder)) == 0:
-            os.remove(imgs_folder)
+            os.rmdir(imgs_folder)
 
 def delete_files(folder_path, filenames):
     for name in filenames:
@@ -78,5 +78,5 @@ def convert_avi_to_mp4(avi_file_path: str, fps: float=20.0, delete_old_file: boo
     return True
 
 #turn_imgs_into_video('data/track/uav0000003_00000_s_1', 'uav0000003_00000_s_1', fps=5)
-convert_avi_to_mp4('data/track_video/uav0000003_00000_s_2.avi', 10.0, False)
+# convert_avi_to_mp4('data/track_video/uav0000003_00000_s_2.avi', 20.0, False)
 # while True: print('a')
