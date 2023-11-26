@@ -4,6 +4,7 @@ from src.bounding_box import BoundingBox
 import numpy as np
 import cv2 as cv
 import os
+from time import time 
 
 class Frame():
     masks: list
@@ -12,7 +13,8 @@ class Frame():
     def __init__(self, img, read_labels: list[list[float]]):
         self.img = img
         self.bboxes = self.unnormalize_labels(read_labels)
-        self.apply_non_max_suppression()
+        #self.apply_parallel_non_max_suppression()
+        
 
     def crop_masks(self):
         # print(img)
@@ -61,14 +63,15 @@ class Frame():
 
     # O(n^2)
     def apply_non_max_suppression(self):
-        if len(self.bboxes) <= 1: return
+        if len(self.bboxes) <= 1: return 0
+        start = time()
         keep: list[BoundingBox] = []
         self.bboxes = sorted(self.bboxes, key=lambda bb: bb.conf, reverse=True)
         rem = []
         while len(self.bboxes) > 0:
             keep.append(self.bboxes.pop(0))
             for i in range(len(self.bboxes)):
-                iou = keep[-1].get_intersection_over_union(self.bboxes[i])
+                iou = BoundingBox.get_intersection_over_union_esc(keep[-1],self.bboxes[i])
                 if iou > Frame.THRESHOLD_IOU:
                     rem.append(i)
             rem.reverse()
@@ -76,4 +79,36 @@ class Frame():
                 self.bboxes.pop(i)
             rem.clear()
         self.bboxes = keep
+        end = time()
+        return end - start
+    # O(n)
+    def apply_parallel_non_max_suppression(self):
+        if len(self.bboxes) <= 1: return 0
+        start = time()
+        n = len(self.bboxes)
+        s = list(map(lambda bb: bb.conf, self.bboxes))
+        b = list(map(lambda bb: [bb.x, bb.y, bb.w, bb.h], self.bboxes))
+        
+        row_B, row_S = [], []
+        for i in range(n): #O(n)
+            row_B.append(b)
+            row_S.append(s)
+        row_B = np.array(row_B)
+        row_S = np.array(row_S)
+        col_B = row_B.transpose((1,0,2)) # O(1)
+        col_S = row_S.transpose((1,0))
+        
+        iou = BoundingBox.get_intersection_over_union_arr(row_B, col_B)
+        iou_mask = iou > Frame.THRESHOLD_IOU
+        score_mask = col_S > row_S
 
+        final_mask_matrix = np.logical_and(iou_mask, score_mask) #O(1)
+        final_mask_reduced = final_mask_matrix[0]
+        for i in range(1,n):
+            final_mask_reduced = np.logical_or(final_mask_reduced,final_mask_matrix[i])
+        
+        for i in range(n-1,-1,-1):
+            if final_mask_reduced[i]:
+                self.bboxes.pop(i)
+        end = time()
+        return end - start

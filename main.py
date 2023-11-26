@@ -3,10 +3,9 @@ from detector import Detector
 from tracker import Tracker
 
 def main():
-    FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000076_00241_s'
-    exit(0)
+    FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
     t = Tracker(FRAMES_FOLDER)
-    t.track()
+    t.track(False)
     exit(0)
     #midas = Midas()
     #midas.transform_img('data/test/img0000001.jpg', 'data/depth/test')

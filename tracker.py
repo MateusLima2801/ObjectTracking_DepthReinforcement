@@ -15,16 +15,21 @@ class Tracker:
         self.matcher = Hungarian_Matching()
         
 
-    def track(self):
+    def track(self, delete_imgs = True):
         lf: Frame = None
         
         self.create_output_folder()
+        #i = 1
+        #tt = 0
         for name in self.img_names:
             img_path = self.get_img_path(name)
             img = self.get_img_tensor(name)
             detection_labels = self.detector.detect_and_read_labels(img_path, conf=0.15)
             if len(detection_labels) == 0: continue
             cf = Frame(img, detection_labels[name.split('.')[0]])
+            cf.apply_parallel_non_max_suppression()
+            #print(f"Mean suppression time ({i}): {tt/i}s")
+            #i+=1
             cf.crop_masks()
             #cf.show_masks()
             
@@ -49,7 +54,7 @@ class Tracker:
 
             cf.save_frame_and_bboxes_with_id(os.path.join(self.output_folder, name))
             lf = cf
-        utils.turn_imgs_into_video(self.output_folder, self.output_folder.split('/')[-1], delete_imgs=True, fps=10)
+        utils.turn_imgs_into_video(self.output_folder, self.output_folder.split('/')[-1], delete_imgs=delete_imgs, fps=10)
 
     def create_output_folder(self):
         folder = self.source_folder.split("/")[-1]+"_0"

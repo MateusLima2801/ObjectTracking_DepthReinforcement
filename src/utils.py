@@ -77,6 +77,6 @@ def convert_avi_to_mp4(avi_file_path: str, fps: float=20.0, delete_old_file: boo
     os.popen(cmd)
     return True
 
-#turn_imgs_into_video('data/track/uav0000003_00000_s_1', 'uav0000003_00000_s_1', fps=5)
+# turn_imgs_into_video('data/track/uav0000076_00241_s_1', 'uav0000076_00241_s_1', fps=5)
 # convert_avi_to_mp4('data/track_video/uav0000003_00000_s_2.avi', 20.0, False)
 # while True: print('a')
