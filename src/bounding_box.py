@@ -3,7 +3,7 @@ import numpy as np
 
 class BoundingBox():
     
-    def __init__(self, x: float, y:float, w:float, h:float, conf:float):
+    def __init__(self, x: float, y:float, w:float, h:float, conf:float, depth: float):
         self.x = x #x_centroid
         self.y = y #y_centroid
         self.w = w #width
@@ -14,6 +14,7 @@ class BoundingBox():
         self.y_ur = int(self.y + self.h/2)
         self.conf = conf    
         self.id = -1
+        self.depth = depth
 
     @staticmethod
     def get_area_esc(bb: BoundingBox):

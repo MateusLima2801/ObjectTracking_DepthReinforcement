@@ -5,12 +5,12 @@ import cv2 as cv
 import numpy as np
 import subprocess
 
-def get_number_from_filename(filename):
+def get_number_from_filename(filename:str):
     name = filename.split('.')[0][3:]
     n = int(name)
     return n
 
-def get_filenames_from(imgs_folder, extension):
+def get_filenames_from(imgs_folder:str , extension:str) -> list[str]:
     images = [img for img in os.listdir(imgs_folder) if img.endswith(extension)]
     images.sort(key=get_number_from_filename)
     return images

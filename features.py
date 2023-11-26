@@ -70,8 +70,21 @@ class Position_Matcher():
     def calculate_distance(self,shape1, shape2, p1, p2):
         d = 0
         for i in range(len(p1)):
-            d += (p1[i]/shape1[i]-p2[i]/shape2[i])**2
+            d += (p1[i]-p2[i])**2
         return math.sqrt(d)
+
+class Depth_Matcher():
+    def generate_distance_cost_matrix(self, f1: Frame, f2: Frame):
+        cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))
+        rows = len(cost)
+        cols = len(cost[0])
+        for i in range(rows):
+            for j in range(cols):
+                cost[i,j] = self.calculate_distance(f1.img.shape,f2.img.shape, (f1.bboxes[i].x,f1.bboxes[i].y ), (f2.bboxes[j].x, f2.bboxes[j].y))
+        return utils.normalize_array(cost)
+    
+    def calculate_distance(self,depth1, depth2):
+        return  (p1[i]/shape1[i]-p2[i]/shape2[i])**2
 
 class Hungarian_Matching():
     def __init__(self):

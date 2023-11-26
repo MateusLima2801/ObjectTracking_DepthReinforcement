@@ -1,13 +1,12 @@
 from ultralytics import YOLO
-from src.deprecated.midas_loader import Midas
 from src.utils import *
 
 class Detector():
-    def __init__(self):
-        # self.midas = Midas()
-        self.model_label = {"detection": "yolov8n.pt", "segmentation": "yolov8n-seg.pt"}
+    # def __init__(self):
+    #     self.model_label = {"detection": "yolov8n.pt", "segmentation": "yolov8n-seg.pt"}
 
-    def detect(self, source: str,  conf: float=0.3):
+    @staticmethod
+    def detect(source: str,  conf: float=0.3):
         model = YOLO("yolov8n.pt") # for detection
 
         ##Predict Method Takes all the parameters of the Command Line Interface
@@ -19,12 +18,14 @@ class Detector():
         prediction = model.predict(source=source, conf = conf, save = True, save_txt=True, save_conf=True)
         #model.export(format="onnx")
 
-    def detect_and_read_labels(self,source: str, conf: float=0.3) -> dict:
+    @staticmethod
+    def detect_and_read_labels(source: str, conf: float=0.3) -> dict:
         delete_folder('runs/detect')
-        self.detect(source, conf)
-        return self.read_labels_from('runs/detect/predict')
-        
-    def read_labels_from(self, source) -> dict:
+        Detector.detect(source, conf)
+        return Detector.read_labels_from('runs/detect/predict')
+    
+    @staticmethod
+    def read_labels_from(source) -> dict:
         path = os.path.join(source, 'labels')
         files = os.listdir(path)
         labels_by_file = {}
@@ -39,30 +40,6 @@ class Detector():
                         labels.append(info)
                 labels_by_file[file.split('.')[0]] = labels
         return labels_by_file
-
-    def retrieve_depth(self,source_img: str, source_labels: str):
-        array = [[0,0],[1,1]] #self.midas.get_depth_array(source_img)
-        labels = self.read_labels(source_labels)
-        for label in labels:
-            print(label)
-            depth = self.extract_center_depth(label[1], label[2], array)
-            label.append(depth)
-        self.write_labels(labels,source_labels)
-
-    def extract_center_depth(self, x_center: float, y_center: float, array) -> float:
-        x_size = len(array[0])
-        y_size = len(array)
-        center_coord =  ( int(x_center*x_size), int(y_center*y_size))
-        return array[center_coord[0], center_coord[1]]
-
-    
-    def write_labels(self, labels: list, file_path: str):
-        with open(file_path, 'w') as f:
-            labels = cast_list(labels, str)
-            for label in labels:
-                line = ' '.join(label) + '\n'
-                f.write(line)
-
 
 # det = Detector()
 # det.detect('data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s/img0000106.jpg', conf=0.1)

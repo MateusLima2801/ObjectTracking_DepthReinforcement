@@ -57,3 +57,19 @@ class Midas:
         return depth_array
     
 
+    def get_depth_array(self, img):
+        input_batch = self.transform(img).to(self.device)
+
+        with torch.no_grad():
+            prediction = self.midas(input_batch)
+
+            prediction = torch.nn.functional.interpolate(
+                prediction.unsqueeze(1),
+                size=img.shape[:2],
+                mode="bicubic",
+                align_corners=False,
+            ).squeeze()
+
+        depth_array = prediction.cpu().numpy()
+        return depth_array
+    
