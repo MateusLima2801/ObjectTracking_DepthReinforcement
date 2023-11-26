@@ -21,6 +21,8 @@ class Feature_Matcher():
     
     def show_matches(self,img1,kp1,img2,kp2,matches, label):
         img3 = cv.drawMatchesKnn(img1,kp1,img2,kp2,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+        if len(matches) > 7:
+            plt.imsave(f'data/match{label}.jpg', img3)
         plt.imshow(img3)
         plt.legend([label])
         plt.show(block=True)
@@ -51,7 +53,7 @@ class Feature_Matcher():
                 matches = self.get_matches(des1[i], des2[j])
                 profit[i,j] = len(matches)
                 #print(f'{i}, {j}: {cost[i,j]}')
-                #self.show_matches(features1[i], kp1[i], features2[j], kp2[j], matches, f'{i}, {j}: {cost[i,j]}')
+                self.show_matches(features1[i], kp1[i], features2[j], kp2[j], matches, f'{i}_{j}')
         cost = utils.normalize_array(-profit)
         return cost
     

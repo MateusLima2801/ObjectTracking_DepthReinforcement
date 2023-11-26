@@ -46,11 +46,12 @@ class Frame():
 
     def save_frame_and_bboxes_with_id(self, output_filename: str, show_conf:bool = False):
         for bb in self.bboxes:
-            cv.rectangle(self.img, (bb.x_ll, bb.y_ll), (bb.x_ur, bb.y_ur), color=(255,255,0), thickness=2)
+            copy = self.img.copy()
+            cv.rectangle(copy, (bb.x_ll, bb.y_ll), (bb.x_ur, bb.y_ur), color=(255,255,0), thickness=2)
             label = f'Id: {bb.id}'
             if show_conf: label += ', Conf: '+'{:.2f}'.format(bb.conf)
             cv.putText(
-                self.img,
+                copy,
                 label,
                 (bb.x_ll, bb.y_ll - 10),
                 fontFace = cv.FONT_HERSHEY_SIMPLEX,
@@ -58,7 +59,7 @@ class Frame():
                 color = (255, 255, 255),
                 thickness=2
             )
-        bgr_img = cv.cvtColor(self.img, cv.COLOR_RGB2BGR)
+        bgr_img = cv.cvtColor(copy, cv.COLOR_RGB2BGR)
         cv.imwrite(output_filename, bgr_img)
 
     # O(n^2)
@@ -81,6 +82,7 @@ class Frame():
         self.bboxes = keep
         end = time()
         return end - start
+    
     # O(n)
     def apply_parallel_non_max_suppression(self):
         if len(self.bboxes) <= 1: return 0

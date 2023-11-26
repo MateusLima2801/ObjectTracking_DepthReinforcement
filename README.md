@@ -33,7 +33,7 @@
 
 1. Allows to distinguish objects in different depths, it'd work well in the case we have similar objects near to each other but in different depths (crossing)
 2. If the camera turns...
-3. You can use depth to adjust threshold
+3. You can use depth to adjust threshold (?)
 
 ## Tasks
 
@@ -49,15 +49,13 @@
 - Optical flow solves occlusion problem, not applying it is bad
 - use Lowe ratio test to ensure that the best match is distinguished enough of the second match (done)
 - create a video with the matches (done):
-  - track bboxes with a dictionary with key = id and value = label - the dict changes each iteration and it's used in runtime
-    (done)
-  - adapt method which create videos(done)
 - solve overlap bbox problem (non maximum suppression) (done)
 - add center depth ( )
-- IDEA: apply evaluation metric (iou - a lot of work, need to annotate the frames ground truth) and train the weights over the cost_matrixes over VisDroneDataSet
+- IDEA: apply evaluation metric (iou) and train the weights over the cost_matrixes over VisDroneDataSet
 - compress track frames at end of tracking
 - apply Parallel NMS(0.6ms) instead of NMS (137ms) (done)
-- send results ( )
+- send results (done)
+- apply validation with ground truth annotations provided by VisDrone
 
 ## Problems
 

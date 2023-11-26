@@ -5,7 +5,7 @@ import os
 
 def main():
     SEQUENCES_FOLDER = 'data/VisDrone2019-SOT-train/sequences'
-    SEQUENCE_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
+    SEQUENCE_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000076_00241_s'
     matcher = Hungarian_Matching()
     midas = Midas()
     tracker = Tracker(matcher, midas)

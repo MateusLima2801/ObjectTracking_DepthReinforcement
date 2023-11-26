@@ -51,12 +51,13 @@ def turn_imgs_into_video(imgs_folder, video_filename:str, img_extension = "jpg",
     for image in images:
         video.write(cv.imread(os.path.join(imgs_folder, image)))
     video.release()
-    convert_avi_to_mp4(video_path, fps, True)
 
     if delete_imgs:
         delete_files(imgs_folder, images)
         if len(os.listdir(imgs_folder)) == 0:
             os.rmdir(imgs_folder)
+
+    convert_avi_to_mp4(video_path, fps, True)
 
 def delete_files(folder_path, filenames):
     for name in filenames:
@@ -69,6 +70,7 @@ def normalize_array(array: np.ndarray):
     else:
         return (array - np.min(array)) / (np.max(array) - np.min(array))
 
+# improve it, stop shell after popen
 def convert_avi_to_mp4(avi_file_path: str, fps: float=20.0, delete_old_file: bool = True):
     output_name = avi_file_path.split('.')[0]
     cmd = f"ffmpeg -i '{avi_file_path}' -filter:v fps={fps} -ac 2 -b:v 2000k -c:a aac -c:v libx264 -b:a 160k -vprofile high -bf 0 -strict experimental -f mp4 '{output_name}.mp4';"
@@ -78,5 +80,5 @@ def convert_avi_to_mp4(avi_file_path: str, fps: float=20.0, delete_old_file: boo
     return True
 
 # turn_imgs_into_video('data/track/uav0000076_00241_s_1', 'uav0000076_00241_s_1', fps=5)
-# convert_avi_to_mp4('data/track_video/uav0000003_00000_s_2.avi', 20.0, False)
+# convert_avi_to_mp4('data/track_video/uav0000016_00000_s_0.avi', 20.0, True)
 # while True: print('a')
