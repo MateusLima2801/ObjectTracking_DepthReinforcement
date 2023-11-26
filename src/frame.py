@@ -42,13 +42,14 @@ class Frame():
             bboxes.append(BoundingBox(x,y,w,h, float(read_labels[i][5])))
         return bboxes
 
-    def save_frame_and_bboxes_with_id(self, output_filename: str):
+    def save_frame_and_bboxes_with_id(self, output_filename: str, show_conf:bool = False):
         for bb in self.bboxes:
             cv.rectangle(self.img, (bb.x_ll, bb.y_ll), (bb.x_ur, bb.y_ur), color=(255,255,0), thickness=2)
-            
+            label = f'Id: {bb.id}'
+            if show_conf: label += ', Conf: '+'{:.2f}'.format(bb.conf)
             cv.putText(
                 self.img,
-                f'Id: {bb.id}, Conf: '+'{:.2f}'.format(bb.conf),
+                label,
                 (bb.x_ll, bb.y_ll - 10),
                 fontFace = cv.FONT_HERSHEY_SIMPLEX,
                 fontScale = 0.6,
@@ -58,6 +59,7 @@ class Frame():
         bgr_img = cv.cvtColor(self.img, cv.COLOR_RGB2BGR)
         cv.imwrite(output_filename, bgr_img)
 
+    # O(n^2)
     def apply_non_max_suppression(self):
         if len(self.bboxes) <= 1: return
         keep: list[BoundingBox] = []

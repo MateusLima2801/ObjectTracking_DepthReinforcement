@@ -2,4 +2,4 @@ __pycache__/*
 data/*
 *.jpg
 .vscode/*
-*/__pycache__/*
+src/__pycache__/*

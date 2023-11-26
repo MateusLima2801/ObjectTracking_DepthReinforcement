@@ -19,6 +19,21 @@
 2. Develop object tracking algorithm based on features similarities comparison with depth + rgb features
    ...
 
+## Matching methods advantages
+
+### Feature
+
+1. Allows to distinguish different looking objects
+
+### Position
+
+1. Allows to distinguish distant objects in the frame
+
+### Depth
+
+1. Allows to distinguish objects in different depths, it'd work well in the case we have similar objects near to each other but in different depths (crossing)
+2. If the camera turns...
+
 ## Tasks
 
 = Develop single object tracking based in feature matching
@@ -48,3 +63,7 @@
 - Overlapping bounding boxes (it's worse in human crowd videos) (solved with NMS)
 - bboxes should be an attribute of the frame, otherwise it will leave residues of old bboxes in the frames (solved)
 - NMS should consider the estimated direction of the velocity and features of mask prediction (after it will have a virtual one created with optical flow ) so in crossing or ultrapassing the detection wouldn't be pruned
+
+## References
+
+1. H. Lee, J. -S. Lee and H. -C. Choi, "Parallelization of Non-Maximum Suppression," in IEEE Access, vol. 9, pp. 166579-166587, 2021, doi: 10.1109/ACCESS.2021.3134639.

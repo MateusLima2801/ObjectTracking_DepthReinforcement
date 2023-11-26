@@ -79,7 +79,7 @@ class Hungarian_Matching():
         self.position_matcher = Position_Matcher()
 
     def generate_cost_matrix(self,features1: Frame, features2: Frame):
-        x = 0.2
+        x = 0.5
         feature_cost = self.feature_matcher.generate_features_cost_matrix(features1.masks, features2.masks)
         position_cost = self.position_matcher.generate_distance_cost_matrix(features1, features2)
         return x * feature_cost + (1-x) * (position_cost)

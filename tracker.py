@@ -4,7 +4,7 @@ import src.utils as utils
 import os
 from src.frame import Frame
 
-FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000016_00000_s'
+FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
 
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
@@ -19,7 +19,7 @@ class Tracker:
         lf: Frame = None
         
         self.create_output_folder()
-        for name in self.img_names[18:19]:
+        for name in self.img_names:
             img_path = self.get_img_path(name)
             img = self.get_img_tensor(name)
             detection_labels = self.detector.detect_and_read_labels(img_path, conf=0.15)
@@ -49,7 +49,7 @@ class Tracker:
 
             cf.save_frame_and_bboxes_with_id(os.path.join(self.output_folder, name))
             lf = cf
-        utils.turn_imgs_into_video(self.output_folder, self.output_folder.split('/')[-1], delete_imgs=False)
+        utils.turn_imgs_into_video(self.output_folder, self.output_folder.split('/')[-1], delete_imgs=False, fps=10)
 
     def create_output_folder(self):
         folder = self.source_folder.split("/")[-1]+"_0"
@@ -71,3 +71,4 @@ class Tracker:
 
 t = Tracker(FRAMES_FOLDER)
 t.track()
+exit()
