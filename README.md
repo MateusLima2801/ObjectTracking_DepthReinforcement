@@ -63,6 +63,7 @@
 - Overlapping bounding boxes (it's worse in human crowd videos) (solved with NMS)
 - bboxes should be an attribute of the frame, otherwise it will leave residues of old bboxes in the frames (solved)
 - NMS should consider the estimated direction of the velocity and features of mask prediction (after it will have a virtual one created with optical flow ) so in crossing or ultrapassing the detection wouldn't be pruned
+- detection outdoors has lower confidence scores
 
 ## References
 

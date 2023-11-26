@@ -1,5 +1,5 @@
 from ultralytics import YOLO
-from midas_loader import Midas
+from src.deprecated.midas_loader import Midas
 from src.utils import *
 
 class Detector():

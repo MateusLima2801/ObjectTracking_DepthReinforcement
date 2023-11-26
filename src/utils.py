@@ -65,7 +65,7 @@ def delete_files(folder_path, filenames):
 
 def normalize_array(array: np.ndarray):
     if np.min(array) == np.max(array): 
-        return array / np.min(array)
+        return 1
     else:
         return (array - np.min(array)) / (np.max(array) - np.min(array))
 

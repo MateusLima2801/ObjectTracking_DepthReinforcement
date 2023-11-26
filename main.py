@@ -1,8 +1,8 @@
-from deprecated.midas_loader import Midas
+from src.deprecated.midas_loader import Midas
 from detector import Detector
 from tracker import Tracker
 def main():
-    FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
+    FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000080_01680_s'
     t = Tracker(FRAMES_FOLDER)
     t.track()
     exit(0)
