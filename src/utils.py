@@ -3,7 +3,6 @@ import shutil
 import matplotlib.pyplot as plt
 import cv2 as cv
 import numpy as np
-import subprocess
 
 def get_number_from_filename(filename:str):
     name = filename.split('.')[0][3:]
@@ -25,7 +24,7 @@ def cast_list(test_list, data_type):
 def get_img_from_file(source):
     return plt.imread(source)
 
-def get_bbox_dimensions(img, label):
+def get_bbox_dimensions(img: np.ndarray, label:list[float]):
     H, W, _ = img.shape
     x,y,w,h = [int(label[1]*W), int(label[2]*H), int(label[3]*W), int(label[4]*H)]
     return x,y,w,h
@@ -78,6 +77,10 @@ def convert_avi_to_mp4(avi_file_path: str, fps: float=20.0, delete_old_file: boo
         cmd +=f' rm {avi_file_path};'
     os.popen(cmd)
     return True
+
+def show_img(img: np.ndarray):
+    plt.imshow(img)
+    plt.show(block=True)
 
 # turn_imgs_into_video('data/track/uav0000076_00241_s_1', 'uav0000076_00241_s_1', fps=5)
 # convert_avi_to_mp4('data/track_video/uav0000016_00000_s_0.avi', 20.0, True)

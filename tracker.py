@@ -10,7 +10,6 @@ class Tracker:
     def __init__(self, matcher: Hungarian_Matching, midas: Midas):
         self.matcher = matcher
         self.midas = midas
-        
 
     def track(self, source_folder:str, delete_imgs:bool = True, fps: float = 10.0, max_idx: int = None):
         lf: Frame = None
@@ -24,12 +23,13 @@ class Tracker:
             img_path = os.path.join(source_folder, name)
             img = Tracker.get_img_tensor(source_folder, name)
             detection_labels = Detector.detect_and_read_labels(img_path, conf=0.15)
-            if len(detection_labels) == 0: continue
-            # self.midas
-            cf = Frame(img, detection_labels[name.split('.')[0]])
+            if len(detection_labels) <= 0: continue
+            depth_array = self.midas.get_depth_array(img)
+            cf = Frame(img, detection_labels[name.split('.')[0]], depth_array)
             cf.apply_parallel_non_max_suppression()
             #print(f"Mean suppression time ({i}): {tt/i}s")
             #i+=1
+            
             cf.crop_masks()
             #cf.show_masks()
             

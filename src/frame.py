@@ -10,9 +10,10 @@ class Frame():
     masks: list
     THRESHOLD_IOU = 0.8
 
-    def __init__(self, img, read_labels: list[list[float]]):
+    def __init__(self, img: np.ndarray, read_labels: list[list[float]], depth_array: np.ndarray):
         self.img = img
-        self.bboxes = self.unnormalize_labels(read_labels)
+        self.depth_array = depth_array
+        self.bboxes = self.init_bboxes(read_labels)
         #self.apply_parallel_non_max_suppression()
         
 
@@ -27,7 +28,6 @@ class Frame():
             # self._show_mask(img, mask)
             masks.append(mask)
         self.masks = masks
-
     
     def show_masks(self):
         for mask in self.masks:
@@ -37,16 +37,21 @@ class Frame():
             plt.imshow(mask)
             plt.show(block=True)
     
-    def unnormalize_labels(self, read_labels: list[str]) -> list[BoundingBox]:
+    def init_bboxes(self, read_labels: list[str]) -> list[BoundingBox]:
         bboxes = []
         for i in range(len(read_labels)):
             x,y,w,h = utils.get_bbox_dimensions(self.img, read_labels[i])
-            bboxes.append(BoundingBox(x,y,w,h, float(read_labels[i][5])))
+            depth = float(self.depth_array[Frame.interpol(y,len(self.depth_array)), Frame.interpol(x, len(self.depth_array[0]))])
+            bboxes.append(BoundingBox(x,y,w,h, float(read_labels[i][5]), depth))
         return bboxes
 
+    @staticmethod
+    def interpol(n, maxi, mini = 0):
+        return min(max(mini,n),maxi-1)
+    
     def save_frame_and_bboxes_with_id(self, output_filename: str, show_conf:bool = False):
+        copy = self.img.copy()
         for bb in self.bboxes:
-            copy = self.img.copy()
             cv.rectangle(copy, (bb.x_ll, bb.y_ll), (bb.x_ur, bb.y_ur), color=(255,255,0), thickness=2)
             label = f'Id: {bb.id}'
             if show_conf: label += ', Conf: '+'{:.2f}'.format(bb.conf)
@@ -61,7 +66,7 @@ class Frame():
             )
         bgr_img = cv.cvtColor(copy, cv.COLOR_RGB2BGR)
         cv.imwrite(output_filename, bgr_img)
-
+        
     # O(n^2)
     def apply_non_max_suppression(self):
         if len(self.bboxes) <= 1: return 0

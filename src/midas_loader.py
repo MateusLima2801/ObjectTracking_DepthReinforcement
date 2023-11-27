@@ -3,6 +3,7 @@ import torch
 import matplotlib.pyplot as plt
 import os
 from progress.bar import Bar
+import numpy as np
 
 class Midas:
     def __init__(self):
@@ -57,7 +58,7 @@ class Midas:
         return depth_array
     
 
-    def get_depth_array(self, img):
+    def get_depth_array(self, img: np.ndarray):
         input_batch = self.transform(img).to(self.device)
 
         with torch.no_grad():

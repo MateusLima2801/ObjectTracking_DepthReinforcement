@@ -21,8 +21,8 @@ class Feature_Matcher():
     
     def show_matches(self,img1,kp1,img2,kp2,matches, label):
         img3 = cv.drawMatchesKnn(img1,kp1,img2,kp2,matches,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-        if len(matches) > 7:
-            plt.imsave(f'data/match{label}.jpg', img3)
+        # if len(matches) > 7:
+        #     plt.imsave(f'data/match{label}.jpg', img3)
         plt.imshow(img3)
         plt.legend([label])
         plt.show(block=True)
@@ -53,51 +53,55 @@ class Feature_Matcher():
                 matches = self.get_matches(des1[i], des2[j])
                 profit[i,j] = len(matches)
                 #print(f'{i}, {j}: {cost[i,j]}')
-                self.show_matches(features1[i], kp1[i], features2[j], kp2[j], matches, f'{i}_{j}')
+                # self.show_matches(features1[i], kp1[i], features2[j], kp2[j], matches, f'{i}_{j}')
         cost = utils.normalize_array(-profit)
         return cost
     
 class Position_Matcher():
     # square of centroids distance normalized
     # can be optimized to avoid calculus repetition
-    def generate_distance_cost_matrix(self, f1: Frame, f2: Frame):
+    @staticmethod
+    def generate_distance_cost_matrix(f1: Frame, f2: Frame):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))
         rows = len(cost)
         cols = len(cost[0])
         for i in range(rows):
             for j in range(cols):
-                cost[i,j] = self.calculate_distance(f1.img.shape,f2.img.shape, (f1.bboxes[i].x,f1.bboxes[i].y ), (f2.bboxes[j].x, f2.bboxes[j].y))
+                cost[i,j] = Position_Matcher.calculate_distance((f1.bboxes[i].x,f1.bboxes[i].y ), (f2.bboxes[j].x, f2.bboxes[j].y))
         return utils.normalize_array(cost)
     
-    def calculate_distance(self,shape1, shape2, p1, p2):
+    @staticmethod
+    def calculate_distance(p1, p2):
         d = 0
         for i in range(len(p1)):
             d += (p1[i]-p2[i])**2
         return math.sqrt(d)
 
 class Depth_Matcher():
-    def generate_distance_cost_matrix(self, f1: Frame, f2: Frame):
+    @staticmethod
+    def generate_depth_cost_matrix(f1: Frame, f2: Frame):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))
         rows = len(cost)
         cols = len(cost[0])
         for i in range(rows):
             for j in range(cols):
-                cost[i,j] = self.calculate_distance(f1.img.shape,f2.img.shape, (f1.bboxes[i].x,f1.bboxes[i].y ), (f2.bboxes[j].x, f2.bboxes[j].y))
+                cost[i,j] = Depth_Matcher.calculate_distance(f1.bboxes[i].depth,f2.bboxes[j].depth)
         return utils.normalize_array(cost)
     
-    def calculate_distance(self,depth1, depth2):
-        return  (p1[i]/shape1[i]-p2[i]/shape2[i])**2
+    @staticmethod
+    def calculate_distance(depth1, depth2):
+        return  abs(depth1 - depth2)
 
 class Hungarian_Matching():
     def __init__(self):
         self.feature_matcher = Feature_Matcher()
-        self.position_matcher = Position_Matcher()
 
-    def generate_cost_matrix(self,features1: Frame, features2: Frame):
-        x = 0.5
-        feature_cost = self.feature_matcher.generate_features_cost_matrix(features1.masks, features2.masks)
-        position_cost = self.position_matcher.generate_distance_cost_matrix(features1, features2)
-        return x * feature_cost + (1-x) * (position_cost)
+    def generate_cost_matrix(self,fr1: Frame, fr2: Frame):
+        w = [1/3,1/3,1/3]
+        feature_cost = self.feature_matcher.generate_features_cost_matrix(fr1.masks, fr2.masks)
+        position_cost = Position_Matcher.generate_distance_cost_matrix(fr1, fr2)
+        depth_cost = Depth_Matcher.generate_depth_cost_matrix(fr1, fr2)
+        return w[0] * feature_cost + w[1] * position_cost + w[2] * depth_cost
 
     def match(self, features1: Frame, features2: Frame):
         scores = self.generate_cost_matrix(features1, features2)
