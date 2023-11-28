@@ -42,7 +42,7 @@ class Detector():
         return labels_by_file
 
 # det = Detector()
-# det.detect('data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s/img0000106.jpg', conf=0.1)
+Detector.detect('data/VisDrone2019-MOT-test-dev/sequences/uav0000009_03358_v/0000043.jpg', conf=0.1)
 # det.detect('data/test/img0000014.jpg', conf=0.2)
 # print(r)
 # labels = Detector.read_labels_from('runs/detect/predict5')

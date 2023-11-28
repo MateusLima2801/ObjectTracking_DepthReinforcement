@@ -6,11 +6,15 @@ import cv2 as cv
 import os
 from time import time 
 
+class SimpleFrame():
+    def __init__(self):
+        self.bboxes: list[BoundingBox] = []
+
 class Frame():
     masks: list
     THRESHOLD_IOU = 0.8
 
-    def __init__(self, img: np.ndarray, read_labels: list[list[float]], depth_array: np.ndarray):
+    def __init__(self, img: np.ndarray, read_labels: list[list[float]], depth_array: np.ndarray = None):
         self.img = img
         self.depth_array = depth_array
         self.bboxes = self.init_bboxes(read_labels)
