@@ -10,17 +10,16 @@ from time import time
 class Frame():
     THRESHOLD_IOU = 0.8
 
-    def __init__(self,id:int, img: np.ndarray, read_labels: list[list[float]], depth_array: np.ndarray = None):
+    def __init__(self,id:int, img: np.ndarray = None, read_labels: list[list[float]]=None, depth_array: np.ndarray = None):
         self.id = id
         self.img = img
         self.depth_array = depth_array
-        self.bboxes = self.init_bboxes(read_labels)
+        if read_labels != None:
+            self.bboxes = self.init_bboxes(read_labels)
+        else: self.bboxes: list[BoundingBox] = []
         self.masks: list
+        
         #self.apply_parallel_non_max_suppression()
-    
-    def __init__(self, id: int):
-        self.id = id
-        self.bboxes: list[BoundingBox] = []
 
     def crop_masks(self):
         # print(img)

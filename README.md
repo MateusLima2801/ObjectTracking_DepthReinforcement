@@ -96,13 +96,15 @@
 - send results (done)
 - apply validation with ground truth annotations provided by VisDrone (done)
 - apply optical flow concepts
-- depth extraction could be parallelized because it doesn't depend on order
-- do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important)
+- depth extraction could be parallelized because it doesn't depend on order:
+   - Parallelize depth estimation of images
+- do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important analysis)
+- improve detection (if possible)
 
 ## Problems
 
 - When an object goes out of the image, it has less features for doing the pairing. A solve would be not depend so much in the visual features by applying the position metric to the cost_matrix
-- Occlusion. A solve would be apply optical flow
+- Occlusion. Apply optical flow would make the system more robust to partial occlusion
 - Overlapping bounding boxes (it's worse in human crowd videos) (solved with NMS)
 - bboxes should be an attribute of the frame, otherwise it will leave residues of old bboxes in the frames (solved)
 - NMS should consider the estimated direction of the velocity and features of mask prediction (after it will have a virtual one created with optical flow ) so in crossing or ultrapassing the detection wouldn't be pruned

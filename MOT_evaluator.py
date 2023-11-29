@@ -13,15 +13,17 @@ class CLEAR_Metrics:
         self.false_positives = false_positives
         self.nr_gt_objects = nr_gt_objects
     
-    def print(self):
-         print(f'TRACKING METRICS:\n\nMOTP: {self.mot_precision}\nMOTA: {self.mot_accuracy}\n\nMisses: {self.misses}\nMismatches: {self.mismatches}\nFalse Positives: {self.false_positives}\nGroundTruth Objects: {self.nr_gt_objects}')
+    def to_string(self) -> str:
+         return f'TRACKING METRICS:\n\nMOTP: {self.mot_precision}\nMOTA: {self.mot_accuracy}\n\nMisses: {self.misses}\nMismatches: {self.mismatches}\nFalse Positives: {self.false_positives}\nGroundTruth Objects: {self.nr_gt_objects}'
 
 class MOT_Evaluator():
     # arg: distance threshold (in pixels)
     # returns MOTP and MOTPA
     @staticmethod
-    def calculate_CLEAR_metrics(prediction: TrackingResult, groundTruth: TrackingResult, distance_threshold: float = 50) -> CLEAR_Metrics:
+    def calculate_CLEAR_metrics(prediction: TrackingResult, groundTruth: TrackingResult, distance_threshold: float = 100, max_idx = None) -> CLEAR_Metrics:
         maximum = int(max(max(prediction.frames.keys()), max(groundTruth.frames.keys())))
+        if max_idx != None:
+            maximum = min(maximum, max_idx)
         prev_id_mapping: dict = {}
         mismatches = 0
         false_positives = 0
@@ -54,9 +56,9 @@ class MOT_Evaluator():
                 partial_dict = MOT_Evaluator.get_id_mapping(gt_bbs, pred_bbs, distance_threshold)
                 
                 #increment mismatches
-                if len(prev_id_mapping.items()) > 0:
+                if len(partial_dict.items()) > 0:
                     mismatches += sum(1 for key, val in partial_dict.items() if key in prev_id_mapping.keys() and val != prev_id_mapping[key])
-                id_mapping.update(partial_dict)
+                    id_mapping.update(partial_dict)
 
                 #increment MOTP metrics
                 number_of_matches += len(id_mapping.items())
@@ -79,13 +81,28 @@ class MOT_Evaluator():
     def get_id_mapping(ground_truth_bbs: list[BoundingBox], prediction_bbs: list[BoundingBox], threshold: float):
         mapping: dict = {}
         if len(ground_truth_bbs) > 0  and len(prediction_bbs) > 0:
-            cost = Position_Matcher.generate_cost_matrix(ground_truth_bbs, prediction_bbs, normalize=False)
+            cost = Position_Matcher.generate_cost_matrix_bb(ground_truth_bbs, prediction_bbs, normalize=False)
             matching = Hungarian_Matching.match_from_cost_matrix(cost)
             
             for i,m in enumerate(matching):
                 if m != -1 and  cost[i,m] <= threshold:
                     mapping[ground_truth_bbs[i].id] = prediction_bbs[m].id
         return mapping
+    
+    @staticmethod
+    def save_results_to_file(output_path, metrics: CLEAR_Metrics, weights: list[float]):
+        f = open(output_path, "w")
+        f.write(metrics.to_string())
+        f.write(f"\n\nWeights:\n\nFeatures: {weights[0]}\nPosition: {weights[1]}\nDepth: {weights[2]}")
+    
+    @staticmethod
+    def evaluate_annotations_result(prediction_filepath, ground_truth_filepath, max_idx: int) -> CLEAR_Metrics:
+        prediction = TrackingResult(prediction_filepath)
+        ground_truth = TrackingResult(ground_truth_filepath)
+
+        metrics = MOT_Evaluator.calculate_CLEAR_metrics(prediction, ground_truth, max_idx=max_idx)
+        print(metrics.to_string())
+        return metrics
     
 class TrackingResult():
     def __init__(self, annotations_file_path: str):
@@ -104,8 +121,5 @@ class TrackingResult():
             self.frames[info[0]].bboxes.append(bb)
 
 
-# prediction = TrackingResult('data/track/uav0000009_03358_v_2/annotations.txt')
-# ground_truth = TrackingResult('data/VisDrone2019-MOT-test-dev/annotations/uav0000009_03358_v.txt')
-
-# metrics = MOT_Evaluator.calculate_CLEAR_metrics(prediction, ground_truth)
-# metrics.print()
+metrics = MOT_Evaluator.evaluate_annotations_result('data/track/uav0000355_00001_v_4/annotations.txt','data/VisDrone2019-MOT-test-dev/annotations/uav0000355_00001_v.txt', 100)
+MOT_Evaluator.save_results_to_file(os.path.join('data/track/uav0000355_00001_v_4', "results.txt"), metrics, [1,0,0])

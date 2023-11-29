@@ -78,7 +78,7 @@ class Position_Matcher(Matcher):
         else: return cost
 
     @staticmethod
-    def generate_cost_matrix(f1: list[BoundingBox], f2: list[BoundingBox], normalize: bool = True):
+    def generate_cost_matrix_bb(f1: list[BoundingBox], f2: list[BoundingBox], normalize: bool = True):
         cost = np.zeros((len(f1), len(f2)))
         rows = len(cost)
         cols = len(cost[0])
@@ -91,7 +91,7 @@ class Position_Matcher(Matcher):
     
     @staticmethod
     def calculate_distance(bb1: BoundingBox, bb2: BoundingBox):
-        p1, p2 = (bb1.x, bb1.y), (bb1.x, bb1.y)
+        p1, p2 = (bb1.x, bb1.y), (bb2.x, bb2.y)
         d = 0
         for i in range(len(p1)):
             d += (p1[i]-p2[i])**2
@@ -119,16 +119,16 @@ class Hungarian_Matching():
 
     def generate_cost_matrix(self,fr1: Frame, fr2: Frame, weights: list[float]):
         cost = np.zeros((len(fr1.bboxes), len(fr2.bboxes)))
-        if sum(weights) != 1: raise Exception("Wrong weights: "+ str(weights))
+        if sum(weights) != 1  or len(weights) > len(self.matchers):
+            raise Exception("Wrong weights: "+ str(weights))
         for i, w in enumerate(weights):
             if w > 0:
                 partial_cost = w * self.matchers[i].generate_cost_matrix(fr1, fr2)
                 cost += partial_cost
         return cost
 
-    def match(self, features1: Frame, features2: Frame):
-        w = [1/3,1/3,1/3]
-        scores = self.generate_cost_matrix(features1, features2, w)
+    def match(self, features1: Frame, features2: Frame, weights: list[float]):
+        scores = self.generate_cost_matrix(features1, features2, weights)
 
         n_x, _ = scores.shape
         matching = -1 * np.ones(n_x, dtype=np.int32)

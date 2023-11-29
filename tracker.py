@@ -1,3 +1,4 @@
+from MOT_evaluator import CLEAR_Metrics, MOT_Evaluator, TrackingResult
 from detector import Detector
 from features import Hungarian_Matching, Frame
 from src.frame import Frame
@@ -11,7 +12,7 @@ class Tracker:
         self.matcher = matcher
         self.midas = midas
 
-    def track(self, source_folder:str, delete_imgs:bool = True, fps: float = 10.0, max_idx: int = None):
+    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3], delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, ground_truth_filepath = None):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -41,7 +42,7 @@ class Tracker:
                 lf = cf
                 continue
 
-            matching = self.matcher.match(lf,cf)
+            matching = self.matcher.match(lf,cf,weights)
             #print(matching)
             # if matching == -1: doesn't have a match
             for i in range(len(matching)):
@@ -56,7 +57,11 @@ class Tracker:
             cf.save_frame_and_bboxes_with_id(output_folder, name)
             lf = cf
         utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split('/')[-1], delete_imgs=delete_imgs, fps=fps)
-
+        
+        if ground_truth_filepath != None:
+            metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
+            MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights)
+    
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:
         folder = source_folder.split("/")[-1]+"_0"
@@ -73,7 +78,6 @@ class Tracker:
     @staticmethod
     def get_img_tensor(source_folder:str, name:str):
         return utils.get_img_from_file(os.path.join(source_folder, name))
-
 # FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
 # t = Tracker(FRAMES_FOLDER)
 # t.track()
