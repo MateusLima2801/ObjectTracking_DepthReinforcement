@@ -6,20 +6,21 @@ import cv2 as cv
 import os
 from time import time 
 
-class SimpleFrame():
-    def __init__(self):
-        self.bboxes: list[BoundingBox] = []
 
 class Frame():
-    masks: list
     THRESHOLD_IOU = 0.8
 
-    def __init__(self, img: np.ndarray, read_labels: list[list[float]], depth_array: np.ndarray = None):
+    def __init__(self,id:int, img: np.ndarray, read_labels: list[list[float]], depth_array: np.ndarray = None):
+        self.id = id
         self.img = img
         self.depth_array = depth_array
         self.bboxes = self.init_bboxes(read_labels)
+        self.masks: list
         #self.apply_parallel_non_max_suppression()
-        
+    
+    def __init__(self, id: int):
+        self.id = id
+        self.bboxes: list[BoundingBox] = []
 
     def crop_masks(self):
         # print(img)
@@ -53,7 +54,10 @@ class Frame():
     def interpol(n, maxi, mini = 0):
         return min(max(mini,n),maxi-1)
     
-    def save_frame_and_bboxes_with_id(self, output_filename: str, show_conf:bool = False):
+    def save_frame_and_bboxes_with_id(self, output_folder: str, filename: str, show_conf:bool = False, annotations_filename = "annotations.txt"):
+        self.annotate_frame(output_folder, annotations_filename)
+
+        img_output = os.path.join(output_folder, "imgs", filename)
         copy = self.img.copy()
         for bb in self.bboxes:
             cv.rectangle(copy, (bb.x_ll, bb.y_ll), (bb.x_ur, bb.y_ur), color=(255,255,0), thickness=2)
@@ -69,8 +73,23 @@ class Frame():
                 thickness=2
             )
         bgr_img = cv.cvtColor(copy, cv.COLOR_RGB2BGR)
-        cv.imwrite(output_filename, bgr_img)
-        
+        cv.imwrite(img_output, bgr_img)
+
+    def annotate_frame(self, output_folder: str, annotations_filename: str):
+        file_path = os.path.join(output_folder, annotations_filename)
+
+        f = open(file_path, "a")
+        for bb in self.bboxes:
+            info  = utils.cast_list([self.id, bb.id, bb.x_ll, bb.y_ur, bb.w, bb.h, bb.conf], str)
+            line = ','.join(info) +'\n'
+            f.write(line)
+        f.close()
+
+    def get_bbox_by_id(self, id):
+        for bb in self.bboxes:
+            if id == bb.id: return bb
+        return None
+    
     # O(n^2)
     def apply_non_max_suppression(self):
         if len(self.bboxes) <= 1: return 0

@@ -25,7 +25,8 @@ class Tracker:
             detection_labels = Detector.detect_and_read_labels(img_path, conf=0.15)
             if len(detection_labels) <= 0: continue
             depth_array = self.midas.get_depth_array(img)
-            cf = Frame(img, detection_labels[name.split('.')[0]], depth_array)
+            id = utils.get_number_from_filename(name)
+            cf = Frame(id,img, detection_labels[name.split('.')[0]], depth_array)
             cf.apply_parallel_non_max_suppression()
             #print(f"Mean suppression time ({i}): {tt/i}s")
             #i+=1
@@ -36,7 +37,7 @@ class Tracker:
             if lf == None:
                 for i in range(len(cf.bboxes)):
                     cf.bboxes[i].id = i
-                cf.save_frame_and_bboxes_with_id(os.path.join(output_folder, name))
+                cf.save_frame_and_bboxes_with_id(output_folder, name)
                 lf = cf
                 continue
 
@@ -52,9 +53,9 @@ class Tracker:
                     cf.bboxes[i].id = free_id
                     free_id +=1
 
-            cf.save_frame_and_bboxes_with_id(os.path.join(output_folder, name))
+            cf.save_frame_and_bboxes_with_id(output_folder, name)
             lf = cf
-        utils.turn_imgs_into_video(output_folder, output_folder.split('/')[-1], delete_imgs=delete_imgs, fps=fps)
+        utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split('/')[-1], delete_imgs=delete_imgs, fps=fps)
 
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:
@@ -66,7 +67,7 @@ class Tracker:
             output_folder = output_folder[:-dig_len] + str(i)
             i+=1
             if 10 ** dig_len <= i: dig_len+=1
-        os.makedirs(output_folder, exist_ok = True)
+        os.makedirs(os.path.join(output_folder, "imgs"), exist_ok = True)
         return output_folder
 
     @staticmethod

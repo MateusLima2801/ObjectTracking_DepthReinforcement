@@ -3,7 +3,7 @@ import numpy as np
 
 class BoundingBox():
     
-    def __init__(self, x: int, y:int, w:int, h:int, conf:float, depth: float = 0):
+    def __init__(self, x: int, y:int, w:int, h:int, conf:float, depth: float = 0, id: int = -1):
         self.x = x #x_centroid
         self.y = y #y_centroid
         self.w = w #width
@@ -13,7 +13,7 @@ class BoundingBox():
         self.x_ur = int(self.x + self.w/2)
         self.y_ur = int(self.y + self.h/2)
         self.conf = conf    
-        self.id = -1
+        self.id = id
         self.depth = depth
 
     @staticmethod

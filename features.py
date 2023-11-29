@@ -2,11 +2,16 @@ import numpy as np
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
 import cv2 as cv
+from src.bounding_box import BoundingBox
 import src.utils as utils
 import math
 from src.frame import Frame
 
-class Feature_Matcher():
+class Matcher():
+    def generate_cost_matrix(f1: Frame, f2: Frame):
+        pass
+
+class Feature_Matcher(Matcher):
     def __init__(self):
         self.sift = cv.SIFT_create()
         self.bf = cv.BFMatcher()
@@ -44,10 +49,10 @@ class Feature_Matcher():
                         good.append([m])
         return good
     
-    def generate_features_cost_matrix(self, features1, features2):
-        kp1, des1 = self.detect_keypoints(features1)
-        kp2, des2 = self.detect_keypoints(features2)
-        profit = np.zeros((len(features1), len(features2)))
+    def generate_cost_matrix(self, features1: Frame, features2: Frame):
+        kp1, des1 = self.detect_keypoints(features1.masks)
+        kp2, des2 = self.detect_keypoints(features2.masks)
+        profit = np.zeros((len(features1.masks), len(features2.masks)))
         for i in range(len(profit)):
             for j in range(len(profit[0])):
                 matches = self.get_matches(des1[i], des2[j])
@@ -57,21 +62,36 @@ class Feature_Matcher():
         cost = utils.normalize_array(-profit)
         return cost
     
-class Position_Matcher():
+class Position_Matcher(Matcher):
     # square of centroids distance normalized
     # can be optimized to avoid calculus repetition
     @staticmethod
-    def generate_distance_cost_matrix(f1: Frame, f2: Frame):
+    def generate_cost_matrix(f1: Frame, f2: Frame, normalize: bool = True):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))
         rows = len(cost)
         cols = len(cost[0])
         for i in range(rows):
             for j in range(cols):
-                cost[i,j] = Position_Matcher.calculate_distance((f1.bboxes[i].x,f1.bboxes[i].y ), (f2.bboxes[j].x, f2.bboxes[j].y))
-        return utils.normalize_array(cost)
+                cost[i,j] = Position_Matcher.calculate_distance(f1.bboxes[i], f2.bboxes[j])
+
+        if normalize: return utils.normalize_array(cost)
+        else: return cost
+
+    @staticmethod
+    def generate_cost_matrix(f1: list[BoundingBox], f2: list[BoundingBox], normalize: bool = True):
+        cost = np.zeros((len(f1), len(f2)))
+        rows = len(cost)
+        cols = len(cost[0])
+        for i in range(rows):
+            for j in range(cols):
+                cost[i,j] = Position_Matcher.calculate_distance(f1[i], f2[j])
+
+        if normalize: return utils.normalize_array(cost)
+        else: return cost
     
     @staticmethod
-    def calculate_distance(p1, p2):
+    def calculate_distance(bb1: BoundingBox, bb2: BoundingBox):
+        p1, p2 = (bb1.x, bb1.y), (bb1.x, bb1.y)
         d = 0
         for i in range(len(p1)):
             d += (p1[i]-p2[i])**2
@@ -79,7 +99,7 @@ class Position_Matcher():
 
 class Depth_Matcher():
     @staticmethod
-    def generate_depth_cost_matrix(f1: Frame, f2: Frame):
+    def generate_cost_matrix(f1: Frame, f2: Frame):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))
         rows = len(cost)
         cols = len(cost[0])
@@ -95,17 +115,34 @@ class Depth_Matcher():
 class Hungarian_Matching():
     def __init__(self):
         self.feature_matcher = Feature_Matcher()
+        self.matchers: list[Matcher] = [self.feature_matcher, Position_Matcher, Depth_Matcher]
 
-    def generate_cost_matrix(self,fr1: Frame, fr2: Frame):
-        w = [1/3,1/3,1/3]
-        feature_cost = self.feature_matcher.generate_features_cost_matrix(fr1.masks, fr2.masks)
-        position_cost = Position_Matcher.generate_distance_cost_matrix(fr1, fr2)
-        depth_cost = Depth_Matcher.generate_depth_cost_matrix(fr1, fr2)
-        return w[0] * feature_cost + w[1] * position_cost + w[2] * depth_cost
+    def generate_cost_matrix(self,fr1: Frame, fr2: Frame, weights: list[float]):
+        cost = np.zeros((len(fr1.bboxes), len(fr2.bboxes)))
+        if sum(weights) != 1: raise Exception("Wrong weights: "+ str(weights))
+        for i, w in enumerate(weights):
+            if w > 0:
+                partial_cost = w * self.matchers[i].generate_cost_matrix(fr1, fr2)
+                cost += partial_cost
+        return cost
 
     def match(self, features1: Frame, features2: Frame):
-        scores = self.generate_cost_matrix(features1, features2)
+        w = [1/3,1/3,1/3]
+        scores = self.generate_cost_matrix(features1, features2, w)
 
+        n_x, _ = scores.shape
+        matching = -1 * np.ones(n_x, dtype=np.int32)
+
+        # hungarian method
+        row_ind, col_ind = opt.linear_sum_assignment(scores)
+
+        for (i, j) in zip(row_ind, col_ind):
+            matching[i] = j
+
+        return matching
+    
+    @staticmethod
+    def match_from_cost_matrix(scores: np.ndarray):
         n_x, _ = scores.shape
         matching = -1 * np.ones(n_x, dtype=np.int32)
 

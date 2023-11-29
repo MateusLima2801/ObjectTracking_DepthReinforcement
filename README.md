@@ -94,9 +94,10 @@
 - compress track frames at end of tracking
 - apply Parallel NMS(0.6ms) instead of NMS (137ms) (done)
 - send results (done)
-- apply validation with ground truth annotations provided by VisDrone
+- apply validation with ground truth annotations provided by VisDrone (done)
 - apply optical flow concepts
 - depth extraction could be parallelized because it doesn't depend on order
+- do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important)
 
 ## Problems
 
