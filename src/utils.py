@@ -24,11 +24,6 @@ def cast_list(test_list, data_type):
 def get_img_from_file(source):
     return plt.imread(source)
 
-def get_bbox_dimensions(img: np.ndarray, label:list[float]):
-    H, W, _ = img.shape
-    x,y,w,h = [int(label[1]*W), int(label[2]*H), int(label[3]*W), int(label[4]*H)]
-    return x,y,w,h
-
 def turn_imgs_into_video(imgs_folder, video_filename:str, img_extension = "jpg", output_folder = 'data/track_video', delete_imgs: bool = False, fps: float = 20.0):
     images = [img for img in os.listdir(imgs_folder) if img.endswith(f'.{img_extension}')]
     images.sort(key=get_number_from_filename)

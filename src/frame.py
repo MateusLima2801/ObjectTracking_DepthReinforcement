@@ -8,9 +8,9 @@ from time import time
 
 
 class Frame():
-    THRESHOLD_IOU = 0.8
+    THRESHOLD_IOU = 0.7
 
-    def __init__(self,id:int, img: np.ndarray = None, read_labels: list[list[float]]=None, depth_array: np.ndarray = None):
+    def __init__(self,id:int, img: np.ndarray = None, read_labels: list[list[float]] = None, depth_array: np.ndarray = None):
         self.id = id
         self.img = img
         self.depth_array = depth_array
@@ -43,10 +43,9 @@ class Frame():
     
     def init_bboxes(self, read_labels: list[str]) -> list[BoundingBox]:
         bboxes = []
-        for i in range(len(read_labels)):
-            x,y,w,h = utils.get_bbox_dimensions(self.img, read_labels[i])
-            depth = float(self.depth_array[Frame.interpol(y,len(self.depth_array)), Frame.interpol(x, len(self.depth_array[0]))])
-            bboxes.append(BoundingBox(x,y,w,h, float(read_labels[i][5]), depth))
+        for label in read_labels:
+            depth = float(self.depth_array[Frame.interpol(label[1],len(self.depth_array)), Frame.interpol(label[0], len(self.depth_array[0]))])
+            bboxes.append(BoundingBox(label[0],label[1],label[2],label[3],depth))
         return bboxes
 
     @staticmethod

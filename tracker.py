@@ -5,14 +5,16 @@ from src.frame import Frame
 from src.midas_loader import Midas
 import src.utils as utils
 import os
+import numpy as np
 
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
-    def __init__(self, matcher: Hungarian_Matching, midas: Midas):
+    def __init__(self, matcher: Hungarian_Matching, midas: Midas, detector: Detector):
         self.matcher = matcher
         self.midas = midas
+        self.detector = detector
 
-    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3], delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, ground_truth_filepath = None):
+    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3], delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, ground_truth_filepath = None, conf = 0.6):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -23,11 +25,13 @@ class Tracker:
         for name in img_names:
             img_path = os.path.join(source_folder, name)
             img = Tracker.get_img_tensor(source_folder, name)
-            detection_labels = Detector.detect_and_read_labels(img_path, conf=0.15)
+            detection_labels = self.detector.detect_and_read_labels(img_path, conf)
             if len(detection_labels) <= 0: continue
-            depth_array = self.midas.get_depth_array(img)
+            depth_array = np.zeros((img.shape[0], img.shape[1], 1))
+            if weights[2] > 0:
+                depth_array = self.midas.get_depth_array(img)
             id = utils.get_number_from_filename(name)
-            cf = Frame(id,img, detection_labels[name.split('.')[0]], depth_array)
+            cf = Frame(id,img, detection_labels, depth_array)
             cf.apply_parallel_non_max_suppression()
             #print(f"Mean suppression time ({i}): {tt/i}s")
             #i+=1
@@ -60,7 +64,7 @@ class Tracker:
         
         if ground_truth_filepath != None:
             metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
-            MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights)
+            MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights, conf)
     
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:

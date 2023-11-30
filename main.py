@@ -1,3 +1,4 @@
+from detector import Detector
 from src.midas_loader import Midas
 from tracker import Tracker
 from features import Hungarian_Matching
@@ -9,14 +10,15 @@ def main():
     GROUND_TRUTH_FILEPATH ='data/VisDrone2019-MOT-test-dev/annotations/uav0000355_00001_v.txt'
     matcher = Hungarian_Matching()
     midas = Midas()
-    tracker = Tracker(matcher, midas)
-    weights = [[1,0,0]]
+    detector = Detector()
+    tracker = Tracker(matcher, midas, detector)
+    weights = [[0.5, 0.5, 0], [0.5, 0, 0.5], [1/3,1/3,1/3]]
     # sequences = os.listdir(SEQUENCES_FOLDER)
     # for seq in sequences[:1]:
     #     tracker.track(seq, True, fps=10)
     
     for w in weights:
-        tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=100,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH)
+        tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=100,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.5)
     exit(0)
     #midas.transform_img('data/test/img0000001.jpg', 'data/depth/test')
     #midas.transform_imgs_from_folder('data/test', 'data/depth/test')

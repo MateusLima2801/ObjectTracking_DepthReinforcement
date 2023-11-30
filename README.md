@@ -99,7 +99,7 @@
 - depth extraction could be parallelized because it doesn't depend on order:
    - Parallelize depth estimation of images
 - do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important analysis)
-- improve detection (if possible)
+- improve detection (change from yolo to RetinaNet model)
 
 ## Problems
 
