@@ -16,7 +16,12 @@ class Detector():
         with torch.no_grad():
             out = self.model(batched)
         first_out = out[0]
-        return first_out['boxes'][first_out['scores']>=conf].tolist()
+        bboxes = first_out['boxes'][first_out['scores']>=conf].tolist()
+        scores = first_out['scores'][first_out['scores']>=conf].tolist()
+        labels = []
+        for i, bb in enumerate(bboxes):
+            labels.append([bb[0], bb[1],bb[2],bb[3],scores[i]])
+        return labels
 
     def detect_and_read_labels(self, source: str, conf: float=0.3) -> list[list]:
         bboxes = self.detect(source, conf)
@@ -25,7 +30,7 @@ class Detector():
     @staticmethod
     def transform_bboxes(bboxes: list[list[float]])->list[list]:
         for i,bb in enumerate(bboxes):
-            bboxes[i] =  [int((bb[0]+bb[2])/2), int((bb[1]+bb[3])/2), int(bb[2]-bb[0]), int(bb[3]-bb[1])]
+            bboxes[i] =  [int((bb[0]+bb[2])/2), int((bb[1]+bb[3])/2), int(bb[2]-bb[0]), int(bb[3]-bb[1]), bb[4]]
         return bboxes
 
 # det = Detector()

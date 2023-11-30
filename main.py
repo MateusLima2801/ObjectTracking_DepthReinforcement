@@ -12,13 +12,13 @@ def main():
     midas = Midas()
     detector = Detector()
     tracker = Tracker(matcher, midas, detector)
-    weights = [[0.5, 0.5, 0], [0.5, 0, 0.5], [1/3,1/3,1/3]]
+    weights = [[0.3, 0.7, 0]]#, [0.5, 0, 0.5], [1/3,1/3,1/3]]
     # sequences = os.listdir(SEQUENCES_FOLDER)
     # for seq in sequences[:1]:
     #     tracker.track(seq, True, fps=10)
     
     for w in weights:
-        tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=100,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.5)
+        tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=10,delete_imgs=False,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35)
     exit(0)
     #midas.transform_img('data/test/img0000001.jpg', 'data/depth/test')
     #midas.transform_imgs_from_folder('data/test', 'data/depth/test')

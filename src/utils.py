@@ -5,7 +5,7 @@ import cv2 as cv
 import numpy as np
 
 def get_number_from_filename(filename:str):
-    name = filename.split('.')[0][3:]
+    name = filename.split('.')[0][:]
     n = int(name)
     return n
 

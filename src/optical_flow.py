@@ -1,14 +1,12 @@
+from utils import *
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
 import os
 
-def get_number_from_filename(filename):
-    name = filename.split('.')[0]
-    n = int(name)
-    return n
-
-cap = cv.VideoCapture('data/optical_flow/road2.mp4')
+turn_imgs_into_video('data/optical_flow', 'test_of', 'jpeg')
+exit(0)
+cap = cv.VideoCapture('data/track_video/test_of.mp4')
 
 # params for ShiTomasi corner detection
 feature_params = dict( maxCorners = 100,
@@ -56,7 +54,7 @@ while(1):
         frame = cv.circle(frame, (int(a), int(b)), 5, color[i].tolist(), -1)
     img = cv.add(frame, mask)
 
-    plt.imsave(f'data/optical_flow/{name}.jpeg', img)
+    plt.imsave(f'data/optical_flow/img{name}.jpeg', img)
     # k = cv.waitKey(30) & 0xff
     # if k == 27:
     #     break
@@ -66,5 +64,4 @@ while(1):
     p0 = good_new.reshape(-1, 1, 2)
     name+=1
 
-turn_imgs_into_video('data/optical_flow/', 'data/optical_flow/masked_road2.avi')
-
+turn_imgs_into_video('data/optical_flow', 'test_of', 'jpeg')

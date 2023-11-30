@@ -41,11 +41,11 @@ class Frame():
             plt.imshow(mask)
             plt.show(block=True)
     
-    def init_bboxes(self, read_labels: list[str]) -> list[BoundingBox]:
+    def init_bboxes(self, read_labels: list[list[float]]) -> list[BoundingBox]:
         bboxes = []
         for label in read_labels:
             depth = float(self.depth_array[Frame.interpol(label[1],len(self.depth_array)), Frame.interpol(label[0], len(self.depth_array[0]))])
-            bboxes.append(BoundingBox(label[0],label[1],label[2],label[3],depth))
+            bboxes.append(BoundingBox(label[0],label[1],label[2],label[3], label[4],depth))
         return bboxes
 
     @staticmethod
@@ -140,3 +140,7 @@ class Frame():
                 self.bboxes.pop(i)
         end = time()
         return end - start
+
+# f = Frame(1)
+# f.bboxes = [BoundingBox(35+134/2,466+181/2,134,181, conf=0.8), BoundingBox(35+133/2,468+184/2,133,184, conf=0.5)]
+# f.apply_parallel_non_max_suppression()
