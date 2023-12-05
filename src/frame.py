@@ -29,8 +29,8 @@ class Frame():
         # print(labels)
         masks = []
         for bb in self.bboxes:
-            w0, w1 = max(0,int(bb.x-bb.w/2)),min(self.img.shape[1], int(bb.x+bb.w/2))
-            h0, h1 = max(0,int(bb.y-bb.h/2)), min(self.img.shape[0], int(bb.y+bb.h/2))
+            w0, w1 = max(0,bb.x_ll),min(self.img.shape[1], bb.x_ur)
+            h0, h1 = max(0,bb.y_ur), min(self.img.shape[0], bb.y_ll)
             mask = self.img[h0:h1, w0:w1]
             # self._show_mask(img, mask)
             masks.append(mask)

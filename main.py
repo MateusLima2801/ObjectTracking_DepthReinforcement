@@ -14,8 +14,8 @@ def main():
     opf = RAFTOptFlow()
     tracker = Tracker(matcher, midas, detector, opf)
     
-    weights = [[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
-    supp = [False, True]
+    weights = [[1,0,0]] #[[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
+    supp = [False]#[False, True]
     # sequences = os.listdir(SEQUENCES_FOLDER)
     # for seq in sequences[:1]:
     #     tracker.track(seq, True, fps=10)
@@ -23,7 +23,7 @@ def main():
     i=1
     for s in supp:
         for w in weights:
-            if i > 1:
+            if i > 0:
                 tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=50,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s)
             i+=1
     exit(0)

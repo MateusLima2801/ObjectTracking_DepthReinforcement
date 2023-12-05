@@ -17,9 +17,9 @@ class BoundingBox():
         self.x = x #x_centroid
         self.y = y #y_centroid
         self.x_ll = int(self.x - self.w/2)
-        self.y_ll = int(self.y - self.h/2)
+        self.y_ll = int(self.y + self.h/2)
         self.x_ur = int(self.x + self.w/2)
-        self.y_ur = int(self.y + self.h/2)
+        self.y_ur = int(self.y - self.h/2)
         if virtual:
             self.virtual = virtual
             self.age+=1
