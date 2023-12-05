@@ -100,7 +100,7 @@
    - Parallelize depth estimation of images
 - do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important analysis)
 - improve detection (change from yolo to RetinaNet model)(done) Noticed better confidence scores for the bounding boxes
-- 
+
 ## Problems
 
 - When an object goes out of the image, it has less features for doing the pairing. A solve would be not depend so much in the visual features by applying the position metric to the cost_matrix

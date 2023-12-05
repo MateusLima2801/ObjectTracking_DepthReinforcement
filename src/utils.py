@@ -77,6 +77,14 @@ def show_img(img: np.ndarray):
     plt.imshow(img)
     plt.show(block=True)
 
+# Dot Dictionary
+class dotdict(dict):
+    """dot.notation access to dictionary attributes.
+    Courtesy of https://stackoverflow.com/questions/2352181/how-to-use-a-dot-to-access-members-of-dictionary"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
 # turn_imgs_into_video('data/track/uav0000076_00241_s_1', 'uav0000076_00241_s_1', fps=5)
 # convert_avi_to_mp4('data/track_video/uav0000016_00000_s_0.avi', 20.0, True)
 # while True: print('a')

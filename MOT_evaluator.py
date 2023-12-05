@@ -90,11 +90,12 @@ class MOT_Evaluator():
         return mapping
     
     @staticmethod
-    def save_results_to_file(output_path, metrics: CLEAR_Metrics, weights: list[float], conf: float):
+    def save_results_to_file(output_path, metrics: CLEAR_Metrics, weights: list[float], conf: float, suppression: bool):
         f = open(output_path, "w")
         f.write(metrics.to_string())
         f.write(f"\n\nWeights:\n\nFeatures: {weights[0]}\nPosition: {weights[1]}\nDepth: {weights[2]}")
         f.write(f"\n\nConf: {conf}")
+        f.write(f"\n\nSuppression: {suppression}")
         f.close()
         
     @staticmethod
@@ -123,5 +124,5 @@ class TrackingResult():
             self.frames[info[0]].bboxes.append(bb)
 
 
-# metrics = MOT_Evaluator.evaluate_annotations_result('data/track/uav0000355_00001_v_5/annotations.txt','data/VisDrone2019-MOT-test-dev/annotations/uav0000355_00001_v.txt', 100)
-# MOT_Evaluator.save_results_to_file(os.path.join('data/track/uav0000355_00001_v_5', "results.txt"), metrics, [1,0,0])
+# metrics = MOT_Evaluator.evaluate_annotations_result('data/track/uav0000355_00001_v_1/annotations.txt','data/VisDrone2019-MOT-test-dev/annotations/uav0000355_00001_v.txt', 100)
+# MOT_Evaluator.save_results_to_file(os.path.join('data/track/uav0000355_00001_v_1', "results.txt"), metrics, [1,0,0], 0.35, False)

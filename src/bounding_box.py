@@ -4,17 +4,28 @@ import numpy as np
 class BoundingBox():
     
     def __init__(self, x: int, y:int, w:int, h:int, conf:float=0, depth: float = 0, id: int = -1):
-        self.x = x #x_centroid
-        self.y = y #y_centroid
         self.w = w #width
         self.h = h #height
+        self.update_position(x,y)
+        self.conf = conf    
+        self.id = id
+        self.depth = depth
+        self.virtual = False
+        self.age = 0
+    
+    def update_position(self, x: int, y:int, virtual:bool = False):
+        self.x = x #x_centroid
+        self.y = y #y_centroid
         self.x_ll = int(self.x - self.w/2)
         self.y_ll = int(self.y - self.h/2)
         self.x_ur = int(self.x + self.w/2)
         self.y_ur = int(self.y + self.h/2)
-        self.conf = conf    
-        self.id = id
-        self.depth = depth
+        if virtual:
+            self.virtual = virtual
+            self.age+=1
+    
+    def reset_id(self):
+        self.id =-1
 
     @staticmethod
     def get_area_esc(bb: BoundingBox):

@@ -4,17 +4,19 @@ from features import Hungarian_Matching, Frame
 from src.frame import Frame
 from src.midas_loader import Midas
 import src.utils as utils
+from src.optical_flow import RAFTOptFlow
 import os
 import numpy as np
 
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
-    def __init__(self, matcher: Hungarian_Matching, midas: Midas, detector: Detector):
+    def __init__(self, matcher: Hungarian_Matching, midas: Midas, detector: Detector, opf: RAFTOptFlow):
         self.matcher = matcher
         self.midas = midas
         self.detector = detector
+        #self.opf = opf
 
-    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3], delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, ground_truth_filepath = None, conf = 0.6):
+    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3], delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, ground_truth_filepath = None, conf = 0.6, suppression: bool = True):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -32,20 +34,26 @@ class Tracker:
                 depth_array = self.midas.get_depth_array(img)
             id = utils.get_number_from_filename(name)
             cf = Frame(id,img, detection_labels, depth_array)
-            cf.apply_parallel_non_max_suppression()
+            if suppression:
+                cf.apply_parallel_non_max_suppression()
             #print(f"Mean suppression time ({i}): {tt/i}s")
             #i+=1
             
-            cf.crop_masks()
-            #cf.show_masks()
-            
             if lf == None:
+                cf.crop_masks()
+                #cf.show_masks()
                 for i in range(len(cf.bboxes)):
                     cf.bboxes[i].id = i
                 cf.save_frame_and_bboxes_with_id(output_folder, name)
                 lf = cf
                 continue
 
+            # centroids = np.array([[bb.x, bb.y] for bb in lf.bboxes])
+            # predicted_centroids = self.opf.push_forward(lf.img, cf.img, centroids) 
+            # cf.choose_virtual_bboxes(lf, predicted_centroids)
+            cf.crop_masks()
+            #cf.show_masks()
+            
             matching = self.matcher.match(lf,cf,weights)
             #print(matching)
             # if matching == -1: doesn't have a match
@@ -64,7 +72,7 @@ class Tracker:
         
         if ground_truth_filepath != None:
             metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
-            MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights, conf)
+            MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights, conf, suppression)
     
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:
