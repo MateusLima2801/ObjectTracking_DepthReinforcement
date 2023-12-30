@@ -35,6 +35,15 @@
 2. If the camera turns...
 3. You can use depth to adjust threshold (?)
 
+## Standard Deviation Calculus over Ground-Truth Data
+Our goal is to calculate $\sigma_d$ where $d$ is the metric the cost matrix is related to: depth, position or visual features. Thus, the deviation is given by
+$$\sigma_d = \dfrac{1}{K}\sum_{k=1}^K\sqrt{\sum_{i}\sum_j(d_{k,i,j+1}-d_{k,i,j})^2}$$
+Where:
+1. k is a ground truth sequence
+2. i is an object
+3. j is a frame of the sequence
+
+For the depth and position, centroid metric will be used as reference to compare between frames and as for the visual features, pairs of frames will be compared, each object within the pair having the number of matches used as reference for the deviation calculation.
 ## VisDrone Docs
 
 ### VisDrone Annotations Multi-Object Tracking Header
@@ -100,6 +109,7 @@
    - Parallelize depth estimation of images
 - do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important analysis)
 - improve detection (change from yolo to RetinaNet model)(done) Noticed better confidence scores for the bounding boxes
+- calculate standard deviation of metrics for normalizing the cost matrixes
 
 ## Tune the weights
 Use ground truth annotations to calculate the errors in metrics (depth, posiition, features) between the same object in different frames and divide an equipotent weight for the standard deviation over this errors. Each weight would be divided by the standard deviation calculated for its metric over a set of sequences.
