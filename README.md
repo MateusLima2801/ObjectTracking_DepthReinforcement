@@ -37,7 +37,7 @@
 
 ## Standard Deviation Calculus over Ground-Truth Data
 Our goal is to calculate $\sigma_d$ where $d$ is the metric the cost matrix is related to: depth, position or visual features. Thus, the deviation is given by
-$$\sigma_d = \dfrac{1}{K}\sum_{k=1}^K\sqrt{\sum_{i}\sum_j(d_{k,i,j+1}-d_{k,i,j})^2}$$
+$$\sigma_d = \dfrac{1}{K}\sum_{k=1}^K\sqrt{\dfrac{1}{i\times (j-1)}\sum_{i}\sum_j(d_{k,i,j+1}-d_{k,i,j})^2}$$
 Where:
 1. k is a ground truth sequence
 2. i is an object
