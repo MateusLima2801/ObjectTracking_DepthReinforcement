@@ -1,11 +1,14 @@
 
 import math
 import os
+import numpy as np
+from src.job_workers import JobWorkers
 from src.frame import Frame
 from src.midas_loader import Midas
 from src.bounding_box import BoundingBox
 import src.utils as utils
 from progress.bar import Bar
+from queue import Queue
 
 class DeviationCalculator():
     annotations = "annotations"
@@ -64,15 +67,13 @@ class DepthDeviationCalculator(DeviationCalculator):
 
         frames = {}
         img_source = os.path.join(self.source_folder, self.sequences, sequence)
-        img_names = utils.get_filenames_from(img_source, 'jpg')
-        bar = Bar("Loading depth arrays...")
-        for name in img_names:
-            img_path = os.path.join(img_source, name)
-            img = utils.get_img_from_file(img_path)
-            depth_array = self.midas.get_depth_array(img)
-            id = utils.get_number_from_filename(name)
-            frames[id] = Frame(id,None, None, depth_array)
-            bar.next()
+        img_names = np.array(utils.get_filenames_from(img_source, 'jpg'))
+        bar = Bar("Loading depth arrays...", max=len(img_names))
+        q = Queue()
+        for i in img_names:
+            q.put(i)
+
+        j = JobWorkers(q, DepthDeviationCalculator.iterate_depth_retrieval, 2,True, self.midas, img_source, frames, bar)
 
         square_sum = 0
         counter = 0
@@ -92,6 +93,15 @@ class DepthDeviationCalculator(DeviationCalculator):
         depth_array = frames[frame_id].depth_array
         return float(depth_array[Frame.interpol(bb.y,len(depth_array)), Frame.interpol(bb.x, len(depth_array[0]))])
 
+    @staticmethod
+    def iterate_depth_retrieval(name, args):
+        midas, img_source, frames, bar = args
+        img_path = os.path.join(img_source, name)
+        img = utils.get_img_from_file(img_path)
+        depth_array = midas.get_depth_array(img)
+        id = utils.get_number_from_filename(name)
+        frames[id] = Frame(id,None, None, depth_array)
+        bar.next()
 
 calc = DepthDeviationCalculator("data/VisDrone2019-MOT-test-dev")
 std = calc.calculate()
