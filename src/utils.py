@@ -9,6 +9,9 @@ def get_number_from_filename(filename:str):
     n = int(name)
     return n
 
+def get_filename_from_number(n: int):
+    return str(n).zfill(7) + ".jpg"
+
 def get_filenames_from(imgs_folder:str , extension:str) -> list[str]:
     images = [img for img in os.listdir(imgs_folder) if img.endswith(extension)]
     images.sort(key=get_number_from_filename)

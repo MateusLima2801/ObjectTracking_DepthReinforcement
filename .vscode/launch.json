@@ -19,6 +19,14 @@
             "program": "main.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Deviation Calc",
+            "type": "python",
+            "request": "launch",
+            "program": "calculate_std_deviation.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

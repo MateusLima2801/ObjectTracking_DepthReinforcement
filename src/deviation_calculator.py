@@ -3,6 +3,7 @@ import math
 import os
 import numpy as np
 import json
+from src.features import Feature_Matcher
 from src.job_workers import JobWorkers
 from src.frame import Frame
 from src.midas_loader import Midas
@@ -26,7 +27,9 @@ class DeviationCalculator():
             std = self.calculate_for_a_sequence(seq_name)
             sum += std
             print(f'Sequence {seq_name} - Standard Deviation: {std}')
-        return sum / len(sequences)
+        mean = sum / len(sequences)
+        print(f'Mean Standard Deviation: {mean}')
+        return mean
 
     def calculate_for_a_sequence(self, sequence: str) -> float:
         raise NotImplementedError
@@ -50,18 +53,19 @@ class PositionDeviationCalculator(DeviationCalculator):
         square_sum = 0
         counter = 0
         next_bb, _ = self.create_bounding_box(lines[0])
+        bar = Bar("Processing lines...", max=len(lines)-1)
         for i in range(len(lines[:-1])):
             bb = next_bb
             next_bb, _ = self.create_bounding_box(lines[i+1])
             if bb.id == next_bb.id:
                 square_sum += (bb.x - next_bb.x)**2 + (bb.y - next_bb.y)**2 
                 counter +=1
+            bar.next()
 
         return math.sqrt(square_sum / counter)
     
 class DepthDeviationCalculator(DeviationCalculator):
     depth_sequences = "depth_sequences"
-    #store depth arrays in json
     def __init__(self, source_folder: str):
         super().__init__(source_folder)
         self.midas = Midas()
@@ -79,12 +83,13 @@ class DepthDeviationCalculator(DeviationCalculator):
         for i in img_names:
             q.put(i)
 
-        j = JobWorkers(q, self.iterate_depth_retrieval, 2,True, img_source, frames, bar, sequence)
+        j = JobWorkers(q, self.iterate_depth_retrieval,1,True, img_source, frames, bar, sequence)
 
         square_sum = 0
         counter = 0
         next_bb, f_id = self.create_bounding_box(lines[0])
         next_bb.depth = self.get_centroid_depth(f_id, frames, next_bb)
+        bar = Bar("Processing lines...", max=len(lines)-1)
         for i in range(len(lines[:-1])):
             bb = next_bb
             next_bb, f_id = self.create_bounding_box(lines[i+1])
@@ -92,7 +97,8 @@ class DepthDeviationCalculator(DeviationCalculator):
             if bb.id == next_bb.id:
                 square_sum += (bb.depth - next_bb.depth)**2 
                 counter +=1
-
+            bar.next()
+        os.removedirs(os.path.join(self.depth_folder, sequence))
         return math.sqrt(square_sum / counter)
     
     def get_centroid_depth(self, frame_id: int , frames: dict[int,Frame], bb: BoundingBox) -> float:
@@ -107,7 +113,7 @@ class DepthDeviationCalculator(DeviationCalculator):
             try: depth_array = self.read_json(json_name)
             except: load_midas = True
         else: load_midas = True
-        
+
         if load_midas:
             img_path = os.path.join(img_source, name)
             img = utils.get_img_from_file(img_path)
@@ -118,6 +124,7 @@ class DepthDeviationCalculator(DeviationCalculator):
         bar.next()
     
     def write_json(self, filepath, depth_array:np.ndarray):
+        depth_array = np.round(depth_array, 5)
         content = {'depth_array': depth_array.tolist()}
         f = open(filepath, "w")
         json.dump(content, f)
@@ -129,7 +136,35 @@ class DepthDeviationCalculator(DeviationCalculator):
         f.close()
         return np.array(data['depth_array'])
 
-calc = DepthDeviationCalculator("data/VisDrone2019-MOT-test-dev")
-std = calc.calculate()
-print(std)
+class FeatureDeviationCalculator(DeviationCalculator):
+    def __init__(self, source_folder: str):
+        super().__init__(source_folder)
+        self.matcher = Feature_Matcher()
 
+    def calculate_for_a_sequence(self, sequence: str):
+        lines = self.read_sequence_annotations(sequence)
+        square_sum = 0
+        counter = 0
+        next_bb, f1_id = self.create_bounding_box(lines[0])
+        sec_next_bb, f2_id = self.create_bounding_box(lines[1])
+        des2 = self.get_descriptors(sequence, next_bb, f1_id)
+        des3 = self.get_descriptors(sequence, sec_next_bb, f2_id)
+        bar = Bar("Processing lines...", max=len(lines)-2)
+        for i in range(len(lines[:-2])):
+            bb, f0_id, des1 = next_bb, f1_id, des2
+            next_bb, f1_id, des2 = sec_next_bb, f2_id, des3
+            sec_next_bb, f2_id = self.create_bounding_box(lines[i+2])
+            des3 = self.get_descriptors(sequence, sec_next_bb, f2_id)
+            if bb.id == next_bb.id and next_bb.id == sec_next_bb.id:
+                matches1 = len(self.matcher.get_matches(des1, des2))
+                matches2 = len(self.matcher.get_matches(des2, des3))
+                square_sum += (matches1 - matches2)**2 
+                counter +=1
+            bar.next()
+        return math.sqrt(square_sum / counter)
+    
+    def get_descriptors(self, sequence: str, bb: BoundingBox, f_id: int):
+        mask = [bb.crop_mask(os.path.join(self.source_folder, self.sequences, sequence, utils.get_filename_from_number(f_id)))]
+        _, des = self.matcher.detect_keypoints(mask)
+        return des[0]
+    

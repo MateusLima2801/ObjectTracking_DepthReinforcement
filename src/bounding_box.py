@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy as np
+import src.utils as utils
 
 class BoundingBox():
     
@@ -67,4 +68,10 @@ class BoundingBox():
         union_area = area1 + area2 - intersection_area
         return intersection_area / union_area
     
+    def crop_mask(self, filename: str):
+        img = utils.get_img_from_file(filename)
+        w0, w1 = max(0,self.x_ll),min(img.shape[1], self.x_ur)
+        h0, h1 = max(0,self.y_ur), min(img.shape[0], self.y_ll)
+        mask = img[h0:h1, w0:w1]
+        return mask
     

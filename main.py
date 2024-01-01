@@ -1,7 +1,7 @@
 from detector import Detector
 from src.midas_loader import Midas
 from tracker import Tracker
-from features import Hungarian_Matching
+from src.features import Hungarian_Matching
 from src.optical_flow import RAFTOptFlow
 
 def main():
@@ -15,7 +15,7 @@ def main():
     tracker = Tracker(matcher, midas, detector, opf)
     
     weights = [[1,0,0]] #[[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
-    supp = [False]#[False, True]
+    supp = [True]#[False, True]
     # sequences = os.listdir(SEQUENCES_FOLDER)
     # for seq in sequences[:1]:
     #     tracker.track(seq, True, fps=10)
@@ -23,9 +23,8 @@ def main():
     i=1
     for s in supp:
         for w in weights:
-            if i > 0:
-                tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=50,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s)
-            i+=1
+            tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=50,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s)
+
     exit(0)
     #midas.transform_img('data/test/img0000001.jpg', 'data/depth/test')
     #midas.transform_imgs_from_folder('data/test', 'data/depth/test')
