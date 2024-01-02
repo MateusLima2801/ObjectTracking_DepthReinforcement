@@ -1,6 +1,7 @@
 
 import math
 import os
+import shutil
 import numpy as np
 import json
 from src.features import Feature_Matcher
@@ -65,52 +66,58 @@ class PositionDeviationCalculator(DeviationCalculator):
         return math.sqrt(square_sum / counter)
     
 class DepthDeviationCalculator(DeviationCalculator):
-    depth_sequences = "depth_sequences"
+    depth_annotations = "depth_annotations"
     def __init__(self, source_folder: str):
         super().__init__(source_folder)
         self.midas = Midas()
-        self.depth_folder = os.path.join(self.source_folder,self.depth_sequences)
+        self.depth_folder = os.path.join(self.source_folder,self.depth_annotations)
 
     def calculate_for_a_sequence(self, sequence: str) -> float:
         lines = self.read_sequence_annotations(sequence)
+        lines_by_frame = {}
 
-        frames = {}
+        frame_depths = {}
         os.makedirs(os.path.join(self.depth_folder,sequence),exist_ok = True)
         img_source = os.path.join(self.source_folder, self.sequences, sequence)
         img_names = np.array(utils.get_filenames_from(img_source, 'jpg'))
         bar = Bar("Loading depth arrays...", max=len(img_names))
         q = Queue()
-        for i in img_names:
-            q.put(i)
+        for i, name in enumerate(img_names):
+            q.put(name)
+            lines_by_frame[i+1] = []
+        
+        for line in lines:
+            f_id = int(line.split(',')[0])
+            lines_by_frame[f_id].append(line)
 
-        j = JobWorkers(q, self.iterate_depth_retrieval,1,True, img_source, frames, bar, sequence)
+        j = JobWorkers(q, self.iterate_depth_retrieval,2,True, img_source, frame_depths, bar, sequence, lines_by_frame)
 
         square_sum = 0
         counter = 0
         next_bb, f_id = self.create_bounding_box(lines[0])
-        next_bb.depth = self.get_centroid_depth(f_id, frames, next_bb)
+        next_bb.depth = frame_depths[f_id][next_bb.id]
         bar = Bar("Processing lines...", max=len(lines)-1)
         for i in range(len(lines[:-1])):
             bb = next_bb
             next_bb, f_id = self.create_bounding_box(lines[i+1])
-            next_bb.depth = self.get_centroid_depth(f_id, frames, next_bb)
+            next_bb.depth = next_bb.depth = frame_depths[f_id][str(next_bb.id)]
             if bb.id == next_bb.id:
                 square_sum += (bb.depth - next_bb.depth)**2 
                 counter +=1
             bar.next()
-        os.removedirs(os.path.join(self.depth_folder, sequence))
+        shutil.rmtree(os.path.join(self.depth_folder, sequence))
         return math.sqrt(square_sum / counter)
     
-    def get_centroid_depth(self, frame_id: int , frames: dict[int,Frame], bb: BoundingBox) -> float:
-        depth_array = frames[frame_id].depth_array
+    def get_centroid_depth(self, depth_array: np.ndarray, bb: BoundingBox) -> float:
         return float(depth_array[Frame.interpol(bb.y,len(depth_array)), Frame.interpol(bb.x, len(depth_array[0]))])
 
     def iterate_depth_retrieval(self, name: str, args):
-        img_source, frames, bar, sequence = args
+        img_source, frame_depths, bar, sequence, lines_by_frame = args
+        frame_id = utils.get_number_from_filename(name)
         json_name = os.path.join(self.depth_folder, sequence, '.'.join([name.split('.')[0], 'json']))
         load_midas = False
         if os.path.isfile(json_name):
-            try: depth_array = self.read_json(json_name)
+            try: bboxes_depth = self.read_json(json_name)
             except: load_midas = True
         else: load_midas = True
 
@@ -118,23 +125,28 @@ class DepthDeviationCalculator(DeviationCalculator):
             img_path = os.path.join(img_source, name)
             img = utils.get_img_from_file(img_path)
             depth_array = self.midas.get_depth_array(img)
-            self.write_json(json_name, depth_array)
-        id = utils.get_number_from_filename(name)
-        frames[id] = Frame(id,None, None, depth_array)
+            bboxes_depth = self.write_json(json_name, depth_array, lines_by_frame, frame_id)
+        frame_depths[frame_id] = bboxes_depth
         bar.next()
     
-    def write_json(self, filepath, depth_array:np.ndarray):
-        depth_array = np.round(depth_array, 5)
-        content = {'depth_array': depth_array.tolist()}
+    def write_json(self, filepath, depth_array:np.ndarray, lines_by_frame: dict, frame_id: int):
+        content = {'bboxes_depth': {}}
+        f_lines = lines_by_frame[frame_id]
+        for f_line in f_lines:
+            bb, _ = self.create_bounding_box(f_line)
+            depth = self.get_centroid_depth(depth_array, bb)
+            content['bboxes_depth'][bb.id] = depth
         f = open(filepath, "w")
         json.dump(content, f)
         f.close()
+        return content['bboxes_depth']
 
     def read_json(self, filepath):
         f = open(filepath)
         data = json.load(f)
         f.close()
-        return np.array(data['depth_array'])
+        return np.array(data['bboxes_depth'])
+    
 
 class FeatureDeviationCalculator(DeviationCalculator):
     def __init__(self, source_folder: str):

@@ -109,7 +109,11 @@ For the depth and position, centroid metric will be used as reference to compare
    - Parallelize depth estimation of images
 - do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important analysis)
 - improve detection (change from yolo to RetinaNet model)(done) Noticed better confidence scores for the bounding boxes
-- calculate standard deviation of metrics for normalizing the cost matrixes
+- calculate standard deviation of metrics for normalizing the cost matrixes:
+   - depth: maybe persistence method can be improved, we can persist a new txt file with depth filled for each analyzed frame. That way a smaller amount of unuseful data is stored. Something in the lines of:
+   dict = {
+      1: ['line, depth']
+   }
 
 ## Tune the weights
 Use ground truth annotations to calculate the errors in metrics (depth, posiition, features) between the same object in different frames and divide an equipotent weight for the standard deviation over this errors. Each weight would be divided by the standard deviation calculated for its metric over a set of sequences.
