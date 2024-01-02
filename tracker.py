@@ -16,7 +16,9 @@ class Tracker:
         self.detector = detector
         #self.opf = opf
 
-    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3], delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, ground_truth_filepath = None, conf = 0.6, suppression: bool = True):
+    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3],
+              delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
+              ground_truth_filepath = None, conf = 0.6, suppression: bool = True, std_deviations = [1,1,1]):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -54,7 +56,7 @@ class Tracker:
             cf.crop_masks()
             #cf.show_masks()
             
-            matching = self.matcher.match(lf,cf,weights)
+            matching = self.matcher.match(lf,cf,weights, std_deviations)
             #print(matching)
             # if matching == -1: doesn't have a match
             for i in range(len(matching)):

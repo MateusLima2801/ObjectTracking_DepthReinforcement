@@ -114,7 +114,7 @@ For the depth and position, centroid metric will be used as reference to compare
    dict = {
       1: ['line, depth']
    }
-
+- depth persistence: saving the whole depth array seems to cost too much memory, for accelerating the tracking algorithm one could store a scale reduced version 
 ## Tune the weights
 Use ground truth annotations to calculate the errors in metrics (depth, posiition, features) between the same object in different frames and divide an equipotent weight for the standard deviation over this errors. Each weight would be divided by the standard deviation calculated for its metric over a set of sequences.
 

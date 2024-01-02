@@ -13,21 +13,15 @@ def main():
     detector = Detector()
     opf = RAFTOptFlow()
     tracker = Tracker(matcher, midas, detector, opf)
-    
+    STD_DEVIATIONS = [4.080301076630467,4.1468104706547075,0.6871275236949388]
+
+    # [FEATURE, POSITION, WEIGHT]
     weights = [[1,0,0]] #[[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
     supp = [True]#[False, True]
-    # sequences = os.listdir(SEQUENCES_FOLDER)
-    # for seq in sequences[:1]:
-    #     tracker.track(seq, True, fps=10)
-    
-    i=1
+
     for s in supp:
         for w in weights:
-            tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=50,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s)
-
-    exit(0)
-    #midas.transform_img('data/test/img0000001.jpg', 'data/depth/test')
-    #midas.transform_imgs_from_folder('data/test', 'data/depth/test')
+            tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=50,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s, std_deviations = STD_DEVIATIONS)
 
 if __name__ == "__main__":
     main()

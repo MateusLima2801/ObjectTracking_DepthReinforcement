@@ -95,7 +95,7 @@ class DepthDeviationCalculator(DeviationCalculator):
         square_sum = 0
         counter = 0
         next_bb, f_id = self.create_bounding_box(lines[0])
-        next_bb.depth = frame_depths[f_id][next_bb.id]
+        next_bb.depth = frame_depths[f_id][str(next_bb.id)]
         bar = Bar("Processing lines...", max=len(lines)-1)
         for i in range(len(lines[:-1])):
             bb = next_bb
@@ -145,7 +145,7 @@ class DepthDeviationCalculator(DeviationCalculator):
         f = open(filepath)
         data = json.load(f)
         f.close()
-        return np.array(data['bboxes_depth'])
+        return data['bboxes_depth']
     
 
 class FeatureDeviationCalculator(DeviationCalculator):
