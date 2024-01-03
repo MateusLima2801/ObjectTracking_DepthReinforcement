@@ -135,7 +135,7 @@ class DepthDeviationCalculator(DeviationCalculator):
         for f_line in f_lines:
             bb, _ = self.create_bounding_box(f_line)
             depth = self.get_centroid_depth(depth_array, bb)
-            content['bboxes_depth'][bb.id] = depth
+            content['bboxes_depth'][str(bb.id)] = depth
         f = open(filepath, "w")
         json.dump(content, f)
         f.close()

@@ -11,12 +11,12 @@ def main():
     matcher = Hungarian_Matching()
     midas = Midas()
     detector = Detector()
-    opf = RAFTOptFlow()
-    tracker = Tracker(matcher, midas, detector, opf)
-    STD_DEVIATIONS = [4.080301076630467,4.1468104706547075,0.6871275236949388]
+    # # opf = RAFTOptFlow()
+    tracker = Tracker(matcher, midas, detector, None)
+    STD_DEVIATIONS = [4.080301076630467,4.1468104706547075,0.4823281584040535]
 
-    # [FEATURE, POSITION, WEIGHT]
-    weights = [[1,0,0]] #[[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
+    # [FEATURE, POSITION, DEPTH]
+    weights = [[1/3,1/3,1/3]] #[[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
     supp = [True]#[False, True]
 
     for s in supp:
