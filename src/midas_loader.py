@@ -21,8 +21,8 @@ class Midas:
             self.transform = self.midas_transforms.small_transform
 
     def transform_img(self, input_path: str, output_folder: str):
-        depth_array = self.get_depth_array(input_path)
-        filename = os.path.split(input_path)[1]
+        depth_array = self.get_depth_array_from_str(input_path)
+        filename = os.path.split(input_path)[-1]
         output_path = os.path.join(output_folder,filename)
         os.makedirs(output_folder, exist_ok = True)
         plt.imsave(output_path, depth_array)
@@ -35,7 +35,7 @@ class Midas:
                 self.transform_img(img_path, output_folder)
                 bar.next()
 
-    def get_depth_array(self, input_path: str):
+    def get_depth_array_from_str(self, input_path: str):
         if os.path.isfile(input_path) == False: 
             raise Exception("Wrong input format")
         
@@ -73,4 +73,6 @@ class Midas:
 
         depth_array = prediction.cpu().numpy()
         return depth_array
-    
+
+m = Midas()
+m.transform_img('data/VisDrone2019-MOT-test-dev/sequences/uav0000297_02761_v/0000012.jpg', 'data/depth')

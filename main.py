@@ -6,8 +6,8 @@ from src.optical_flow import RAFTOptFlow
 
 def main():
     SEQUENCES_FOLDER = 'data/VisDrone2019-SOT-train/sequences'
-    SEQUENCE_FOLDER = 'data/VisDrone2019-MOT-test-dev/sequences/uav0000355_00001_v'
-    GROUND_TRUTH_FILEPATH ='data/VisDrone2019-MOT-test-dev/annotations/uav0000355_00001_v.txt'
+    SEQUENCE_FOLDER = 'data/VisDrone2019-MOT-test-dev/sequences/uav0000297_02761_v'
+    GROUND_TRUTH_FILEPATH ='data/VisDrone2019-MOT-test-dev/annotations/uav0000297_02761_v.txt'
     matcher = Hungarian_Matching()
     midas = Midas()
     detector = Detector()
@@ -21,7 +21,7 @@ def main():
 
     for s in supp:
         for w in weights:
-            tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=50,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s, std_deviations = STD_DEVIATIONS)
+            tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=None,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s, std_deviations = STD_DEVIATIONS)
 
 if __name__ == "__main__":
     main()
