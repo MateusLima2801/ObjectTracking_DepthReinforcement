@@ -4,17 +4,15 @@ from src.features import Hungarian_Matching, Frame
 from src.frame import Frame
 from src.midas_loader import Midas
 import src.utils as utils
-from src.optical_flow import RAFTOptFlow
 import os
 import numpy as np
 
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
-    def __init__(self, matcher: Hungarian_Matching, midas: Midas, detector: Detector, opf: RAFTOptFlow):
+    def __init__(self, matcher: Hungarian_Matching, midas: Midas, detector: Detector):
         self.matcher = matcher
         self.midas = midas
         self.detector = detector
-        #self.opf = opf
 
     def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 

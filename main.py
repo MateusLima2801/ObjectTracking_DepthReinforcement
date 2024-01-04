@@ -2,7 +2,6 @@ from detector import Detector
 from src.midas_loader import Midas
 from tracker import Tracker
 from src.features import Hungarian_Matching
-from src.optical_flow import RAFTOptFlow
 
 def main():
     SEQUENCES_FOLDER = 'data/VisDrone2019-SOT-train/sequences'
@@ -11,8 +10,7 @@ def main():
     matcher = Hungarian_Matching()
     midas = Midas()
     detector = Detector()
-    # # opf = RAFTOptFlow()
-    tracker = Tracker(matcher, midas, detector, None)
+    tracker = Tracker(matcher, midas, detector)
     STD_DEVIATIONS = [4.080301076630467,4.1468104706547075,0.4823281584040535]
 
     # [FEATURE, POSITION, DEPTH]
