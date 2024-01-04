@@ -93,7 +93,7 @@ class MOT_Evaluator():
     def save_results_to_file(output_path, metrics: CLEAR_Metrics, weights: list[float], conf: float, suppression: bool, std: list[float]):
         f = open(output_path, "w")
         f.write(metrics.to_string())
-        f.write(f"\n\nWeights:\n\nFeatures: {weights[0]}\nPosition: {weights[1]}\nDepth: {weights[2]}")
+        f.write(f"\n\nWeights:\n\nFeatures: {weights[0]}\nPosition: {weights[1]}\nDepth: {weights[2]}\nDisplacement: {weights[3]}")
         f.write(f"\n\nConf: {conf}")
         f.write(f"\n\nSuppression: {suppression}")
         f.write(f"\n\nStandard Deviation Weights:\n\nFeatures: {std[0]}\nPosition: {std[1]}\nDepth: {std[2]}")

@@ -99,8 +99,11 @@ For the depth and position, centroid metric will be used as reference to compare
    }
 - depth persistence: saving the whole depth array seems to cost too much memory, for accelerating the tracking algorithm one could store a scale reduced version 
 - occlusion maybe can be deakt by taking in account a previous displacement metric, using as cost $c = 1 - cos\theta$ where $\theta$ is the angle between the current and previous displacement vector, which can be calculated by subtracting the centroids position (todo)  
+- annomalies can be dealt by using diff in shape (width and height)
+- make the code work for linux and windows (folder references)
+- abolish weights, use only activation binary complements
 ## Tune the weights
-Use ground truth annotations to calculate the errors in metrics (depth, posiition, features) between the same object in different frames and divide an equipotent weight for the standard deviation over this errors. Each weight would be divided by the standard deviation calculated for its metric over a set of sequences.
+Use ground truth annotations to calculate the errors in metrics (depth, position, features) between the same object in different frames and divide an equipotent weight for the standard deviation over this errors. Each weight would be divided by the standard deviation calculated for its metric over a set of sequences.
 
 ## Problems
 

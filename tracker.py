@@ -60,6 +60,8 @@ class Tracker:
             for i in range(len(matching)):
                 if matching[i] >=0 :
                     cf.bboxes[matching[i]].id = lf.bboxes[i].id
+                    cf.bboxes[matching[i]].calculate_displacement(lf.bboxes[i])
+
             free_id = max(list(map(lambda x: x.id, cf.bboxes))) + 1
             for i in range(len(cf.bboxes)):
                 if cf.bboxes[i].id == -1:
@@ -68,7 +70,7 @@ class Tracker:
 
             cf.save_frame_and_bboxes_with_id(output_folder, name)
             lf = cf
-        utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split('/')[-1], delete_imgs=delete_imgs, fps=fps)
+        utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split('\\')[-1], delete_imgs=delete_imgs, fps=fps)
         
         if ground_truth_filepath != None:
             metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
@@ -76,8 +78,8 @@ class Tracker:
     
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:
-        folder = source_folder.split("/")[-1]+"_0"
-        output_folder = os.path.join("data/track", folder)
+        folder = source_folder.split("\\")[-1]+"_0"
+        output_folder = os.path.join("data\\track", folder)
         dig_len = 1
         i = 1
         while os.path.isdir(output_folder):
