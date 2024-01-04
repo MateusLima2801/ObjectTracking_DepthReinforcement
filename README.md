@@ -99,7 +99,7 @@ For the depth and position, centroid metric will be used as reference to compare
    }
 - depth persistence: saving the whole depth array seems to cost too much memory, for accelerating the tracking algorithm one could store a scale reduced version 
 - occlusion maybe can be deakt by taking in account a previous displacement metric, using as cost $c = 1 - cos\theta$ where $\theta$ is the angle between the current and previous displacement vector, which can be calculated by subtracting the centroids position (todo)  
-- annomalies can be dealt by using diff in shape (width and height)
+- annomalies can be dealt by using diff in shape (width and height) test with 2761 made a gigantic blob steal the id of a person 8 times smaller
 - make the code work for linux and windows (folder references)
 - abolish weights, use only activation binary complements
 ## Tune the weights
