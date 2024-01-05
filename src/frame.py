@@ -209,8 +209,8 @@ class Frame():
     def normalize_confluence_pair(self, x:float, y:float, x_set:list[float], y_set:list[float]) -> float | float:
         return (x-min(x_set))/(max(x_set)-min(x_set)) ,(y-min(y_set))/(max(y_set) - min(y_set)) 
 
-f = Frame(1)
-f.bboxes = [BoundingBox(35+134/2,466+181/2,134,181, conf=0.8), BoundingBox(35+133/2,468+184/2,133,184, conf=0.5),
-            BoundingBox(100+20/2,100+30/2,20,30, conf=0.4),BoundingBox(120+20/2,130+30/2,20,30, conf=0.42)]
-f.apply_confluence()
+# f = Frame(1)
+# f.bboxes = [BoundingBox(35+134/2,466+181/2,134,181, conf=0.8), BoundingBox(35+133/2,468+184/2,133,184, conf=0.5),
+#             BoundingBox(100+20/2,100+30/2,20,30, conf=0.4),BoundingBox(120+20/2,130+30/2,20,30, conf=0.42)]
+# f.apply_confluence()
 
