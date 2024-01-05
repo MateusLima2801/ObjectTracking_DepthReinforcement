@@ -1,6 +1,7 @@
 from __future__ import annotations
 import numpy as np
 import src.utils as utils
+from src.vector import Vector
 
 class BoundingBox():
     
@@ -13,6 +14,7 @@ class BoundingBox():
         self.depth = depth
         self.virtual = False
         self.age = 0
+        self.displacement = Vector(0,0)
     
     def update_position(self, x: int, y:int, virtual:bool = False):
         self.x = x #x_centroid
@@ -27,7 +29,11 @@ class BoundingBox():
     
     def reset_id(self):
         self.id =-1
-
+    
+    def calculate_displacement(self, previous_bb: BoundingBox):
+        self.displacement = Vector( self.x - previous_bb.x, self.y - previous_bb.y)
+        return self.displacement
+    
     @staticmethod
     def get_area_esc(bb: BoundingBox):
         return bb.w * bb.h

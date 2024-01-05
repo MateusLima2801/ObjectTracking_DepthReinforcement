@@ -4,17 +4,15 @@ from src.features import Hungarian_Matching, Frame
 from src.frame import Frame
 from src.midas_loader import Midas
 import src.utils as utils
-from src.optical_flow import RAFTOptFlow
 import os
 import numpy as np
 
 # at first let's do detections each iteration if it works we can do detections offline before iterations
 class Tracker:
-    def __init__(self, matcher: Hungarian_Matching, midas: Midas, detector: Detector, opf: RAFTOptFlow):
+    def __init__(self, matcher: Hungarian_Matching, midas: Midas, detector: Detector):
         self.matcher = matcher
         self.midas = midas
         self.detector = detector
-        #self.opf = opf
 
     def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
@@ -62,6 +60,8 @@ class Tracker:
             for i in range(len(matching)):
                 if matching[i] >=0 :
                     cf.bboxes[matching[i]].id = lf.bboxes[i].id
+                    cf.bboxes[matching[i]].calculate_displacement(lf.bboxes[i])
+
             free_id = max(list(map(lambda x: x.id, cf.bboxes))) + 1
             for i in range(len(cf.bboxes)):
                 if cf.bboxes[i].id == -1:
@@ -70,7 +70,7 @@ class Tracker:
 
             cf.save_frame_and_bboxes_with_id(output_folder, name)
             lf = cf
-        utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split('/')[-1], delete_imgs=delete_imgs, fps=fps)
+        utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split('\\')[-1], delete_imgs=delete_imgs, fps=fps)
         
         if ground_truth_filepath != None:
             metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
@@ -78,8 +78,8 @@ class Tracker:
     
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:
-        folder = source_folder.split("/")[-1]+"_0"
-        output_folder = os.path.join("data/track", folder)
+        folder = source_folder.split("\\")[-1]+"_0"
+        output_folder = os.path.join("data\\track", folder)
         dig_len = 1
         i = 1
         while os.path.isdir(output_folder):
