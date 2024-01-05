@@ -167,8 +167,50 @@ class Frame():
         end = time()
         return end - start
     
+    def apply_confluence(self):
+        CONFLUENCE_THRESHOLD = 1
+        bbs_proximity = {}
+        bbs_neighbours = {}
+        new_bboxes = []
+        old_bboxes = {i:bb for i,bb in enumerate(self.bboxes)}
 
-# f = Frame(1)
-# f.bboxes = [BoundingBox(35+134/2,466+181/2,134,181, conf=0.8), BoundingBox(35+133/2,468+184/2,133,184, conf=0.5)]
-# f.apply_parallel_non_max_suppression()
+        for i, bb in enumerate(self.bboxes):
+            prox_sum = 0
+            bbs_neighbours[i] = []
+            for i_other, bb_other in enumerate(self.bboxes):
+                if bb_other == bb: continue
+                prox = self.calculate_normalized_confluence(bb, bb_other)
+                if prox < CONFLUENCE_THRESHOLD:
+                    prox_sum += prox
+                    bbs_neighbours[i].append(i_other)
+            bbs_proximity[i] = prox_sum*(1-bb.conf)
+            if len(bbs_neighbours[i]) > 0:
+                 bbs_proximity[i]/=len(bbs_neighbours[i])
+        
+        while len(old_bboxes.values()) > 0:
+            bb_idx = min(bbs_proximity, key=bbs_proximity.get)
+            bb = old_bboxes.pop(bb_idx)
+            bbs_proximity.pop(bb_idx)
+            new_bboxes.append(bb)
+            for neightbour_id in bbs_neighbours[bb_idx]:
+                old_bboxes.pop(neightbour_id)
+
+        self.bboxes = new_bboxes
+
+    def calculate_normalized_confluence(self, bb1: BoundingBox, bb2: BoundingBox):
+        x_set = [bb1.x_ur, bb1.x_ll, bb2.x_ur, bb2.x_ll]
+        y_set = [bb1.y_ur, bb1.y_ll, bb2.y_ur, bb2.y_ll]
+        x_ur_1, y_ur_1 = self.normalize_confluence_pair(bb1.x_ur, bb1.y_ur, x_set, y_set)
+        x_ll_1, y_ll_1 = self.normalize_confluence_pair(bb1.x_ll, bb1.y_ll, x_set, y_set)
+        x_ur_2, y_ur_2 = self.normalize_confluence_pair(bb2.x_ur, bb2.y_ur, x_set, y_set)
+        x_ll_2, y_ll_2 = self.normalize_confluence_pair(bb2.x_ll, bb2.y_ll, x_set, y_set)
+        return abs(x_ll_2 - x_ll_1)+abs(x_ur_2 -x_ur_1)+abs(y_ur_2-y_ur_1)+abs(y_ll_2 - y_ll_1)
+    
+    def normalize_confluence_pair(self, x:float, y:float, x_set:list[float], y_set:list[float]) -> float | float:
+        return (x-min(x_set))/(max(x_set)-min(x_set)) ,(y-min(y_set))/(max(y_set) - min(y_set)) 
+
+f = Frame(1)
+f.bboxes = [BoundingBox(35+134/2,466+181/2,134,181, conf=0.8), BoundingBox(35+133/2,468+184/2,133,184, conf=0.5),
+            BoundingBox(100+20/2,100+30/2,20,30, conf=0.4),BoundingBox(120+20/2,130+30/2,20,30, conf=0.42)]
+f.apply_confluence()
 
