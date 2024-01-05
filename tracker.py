@@ -1,8 +1,9 @@
-from MOT_evaluator import CLEAR_Metrics, MOT_Evaluator, TrackingResult
+from MOT_evaluator import MOT_Evaluator
 from detector import Detector
 from src.features import Hungarian_Matching, Frame
 from src.frame import Frame
 from src.midas_loader import Midas
+from progress.bar import Bar
 import src.utils as utils
 import os
 import numpy as np
@@ -14,9 +15,9 @@ class Tracker:
         self.midas = midas
         self.detector = detector
 
-    def track(self, source_folder:str, weights: list[float] = [1/3,1/3,1/3],
+    def track(self, source_folder:str, weights: list[float] = [1,1,1,1,1],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
-              ground_truth_filepath = None, conf = 0.6, suppression: bool = True, std_deviations = [1,1,1]):
+              ground_truth_filepath = None, conf = 0.6, suppression: bool = True, std_deviations = [1,1,1,1,1]):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -24,6 +25,7 @@ class Tracker:
         #tt = 0
         if max_idx is not None:
             img_names = img_names[:max_idx]
+        bar = Bar("Tracking through...", max = len(img_names))
         for name in img_names:
             img_path = os.path.join(source_folder, name)
             img = Tracker.get_img_tensor(source_folder, name)
@@ -60,7 +62,6 @@ class Tracker:
             for i in range(len(matching)):
                 if matching[i] >=0 :
                     cf.bboxes[matching[i]].id = lf.bboxes[i].id
-                    cf.bboxes[matching[i]].calculate_displacement(lf.bboxes[i])
 
             free_id = max(list(map(lambda x: x.id, cf.bboxes))) + 1
             for i in range(len(cf.bboxes)):
@@ -70,7 +71,8 @@ class Tracker:
 
             cf.save_frame_and_bboxes_with_id(output_folder, name)
             lf = cf
-        utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split('\\')[-1], delete_imgs=delete_imgs, fps=fps)
+            bar.next()
+        utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split(utils.file_separator())[-1], delete_imgs=delete_imgs, fps=fps)
         
         if ground_truth_filepath != None:
             metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
@@ -78,8 +80,8 @@ class Tracker:
     
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:
-        folder = source_folder.split("\\")[-1]+"_0"
-        output_folder = os.path.join("data\\track", folder)
+        folder = source_folder.split(utils.file_separator())[-1]+"_0"
+        output_folder = os.path.join("data", "track", folder)
         dig_len = 1
         i = 1
         while os.path.isdir(output_folder):

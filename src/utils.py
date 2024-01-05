@@ -3,6 +3,7 @@ import shutil
 import matplotlib.pyplot as plt
 import cv2 as cv
 import numpy as np
+from platform import system
 
 def get_number_from_filename(filename:str):
     name = filename.split('.')[0][:]
@@ -80,6 +81,13 @@ def show_img(img: np.ndarray):
     plt.imshow(img)
     plt.show(block=True)
 
+def file_separator():
+    sys = system()
+    if "Linux" in sys or "Darwin" in sys:
+        return '/'
+    elif "Windows" in sys:
+        return '\\'
+    
 # Dot Dictionary
 class dotdict(dict):
     """dot.notation access to dictionary attributes.

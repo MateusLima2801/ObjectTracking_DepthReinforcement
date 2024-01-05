@@ -115,7 +115,7 @@ class Depth_Matcher(Matcher):
     def calculate_distance(depth1, depth2):
         return  abs(depth1 - depth2)
 
-class Displacement_Matcher(Matcher):
+class Shape_Matcher(Matcher):
     @staticmethod
     def generate_cost_matrix(f1: Frame, f2: Frame, normalize: bool = False):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))
@@ -123,25 +123,23 @@ class Displacement_Matcher(Matcher):
         cols = len(cost[0])
         for i in range(rows):
             for j in range(cols):
-                cost[i,j] = Displacement_Matcher.calculate_distance(f1.bboxes[i],f2.bboxes[j])
+                cost[i,j] = Shape_Matcher.calculate_distance(f1.bboxes[i],f2.bboxes[j])
         
         if normalize: return utils.normalize_array(cost)
         else: return cost
     
     @staticmethod
     def calculate_distance(bb1: BoundingBox, bb2: BoundingBox):
-        if bb1.displacement.is_null() or bb2.displacement.is_null(): cost = 2
-        else: cost  = 1 - bb1.displacement.cosin(bb2.displacement) 
-        return  cost
+        return  math.sqrt( (bb1.w - bb2.w)**2 + (bb1.h - bb2.h)**2 )
 
 class Hungarian_Matching():
     def __init__(self):
         self.feature_matcher = Feature_Matcher()
-        self.matchers: list[Matcher] = [self.feature_matcher, Position_Matcher, Depth_Matcher, Displacement_Matcher]
+        self.matchers: list[Matcher] = [self.feature_matcher, Position_Matcher, Depth_Matcher, Shape_Matcher]
 
     def generate_cost_matrix(self,fr1: Frame, fr2: Frame, weights: list[float], std_deviations: list[float]):
         cost = np.zeros((len(fr1.bboxes), len(fr2.bboxes)))
-        if sum(weights) != 1  or len(weights) > len(self.matchers):
+        if len(weights) > len(self.matchers):
             raise Exception("Wrong weights: "+ str(weights))
         for i, w in enumerate(weights):
             if w > 0:

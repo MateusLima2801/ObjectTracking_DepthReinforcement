@@ -24,7 +24,7 @@ class DeviationCalculator():
         sequences = os.listdir(os.path.join(self.source_folder, self.annotations))
         sum = 0
         for seq in sequences:
-            seq_name = seq.split('.')[0].split('/')[-1]
+            seq_name = seq.split('.')[0].split(utils.file_separator())[-1]
             std = self.calculate_for_a_sequence(seq_name)
             sum += std
             print(f'Sequence {seq_name} - Standard Deviation: {std}')
@@ -60,6 +60,27 @@ class PositionDeviationCalculator(DeviationCalculator):
             next_bb, _ = self.create_bounding_box(lines[i+1])
             if bb.id == next_bb.id:
                 square_sum += (bb.x - next_bb.x)**2 + (bb.y - next_bb.y)**2 
+                counter +=1
+            bar.next()
+
+        return math.sqrt(square_sum / counter)
+
+class ShapeDeviationCalculator(DeviationCalculator):
+
+    def calculate_for_a_sequence(self, sequence: str) -> float:
+        lines = self.read_sequence_annotations(sequence)
+
+        square_sum = 0
+        counter = 0
+        next_bb: BoundingBox
+        next_bb, _ = self.create_bounding_box(lines[0])
+        bar = Bar("Processing lines...", max=len(lines)-1)
+        for i in range(len(lines[:-1])):
+            bb = next_bb
+            next_bb, _ = self.create_bounding_box(lines[i+1])
+            if bb.id == next_bb.id:
+                square_sum += (bb.w - next_bb.w)**2 + (bb.h - next_bb.h)**2
+    
                 counter +=1
             bar.next()
 
