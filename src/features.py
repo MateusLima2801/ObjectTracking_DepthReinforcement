@@ -33,7 +33,7 @@ class Feature_Matcher(Matcher):
             plt.imsave(os.path.join(matches_path,''f'match{label}.jpg'), img3)
         plt.imshow(img3)
         plt.legend([label])
-        # plt.show(block=True)
+        plt.show(block=True)
     
     # use Lowe ratio test to ensure that the best match is distinguished enough of the second match
     def get_matches(self, des1: np.ndarray, des2: np.ndarray):
@@ -48,7 +48,7 @@ class Feature_Matcher(Matcher):
                     good.append([match[0]])
                 else:
                     m,n = match
-                    if m.distance < 0.75*n.distance or len(good)<20:
+                    if m.distance < 0.75*n.distance:
                         good.append([m])
         return good
     
@@ -60,8 +60,8 @@ class Feature_Matcher(Matcher):
             for j in range(len(profit[0])):
                 matches = self.get_matches(des1[i], des2[j])
                 profit[i,j] = len(matches)
-                print(f'{i}, {j}: {profit[i,j]}')
-                self.show_matches(features1.masks[i], kp1[i], features2.masks[j], kp2[j], matches, f'{i}_{j}')
+                # print(f'{i}, {j}: {profit[i,j]}')
+                # self.show_matches(features1.masks[i], kp1[i], features2.masks[j], kp2[j], matches, f'{i}_{j}')
         cost = -profit
         if normalize: return utils.normalize_array(cost)
         else: return cost
