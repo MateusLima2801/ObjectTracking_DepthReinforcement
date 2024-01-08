@@ -17,7 +17,7 @@ class Tracker:
 
     def track(self, source_folder:str, weights: list[float] = [1,1,1,1,1],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
-              ground_truth_filepath = None, conf = 0.6, suppression: bool = True, std_deviations = [1,1,1,1,1]):
+              ground_truth_filepath = None, conf = 0.6, suppression: bool = True, std_deviations = [1,1,1,1,1], min_bbox_iou= 0.004):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -37,7 +37,7 @@ class Tracker:
             id = utils.get_number_from_filename(name)
             cf = Frame(id,img, detection_labels, depth_array)
             if suppression:
-                cf.apply_parallel_non_max_suppression()
+                cf.apply_confluence()
             #print(f"Mean suppression time ({i}): {tt/i}s")
             #i+=1
             
@@ -50,9 +50,6 @@ class Tracker:
                 lf = cf
                 continue
 
-            # centroids = np.array([[bb.x, bb.y] for bb in lf.bboxes])
-            # predicted_centroids = self.opf.push_forward(lf.img, cf.img, centroids) 
-            # cf.choose_virtual_bboxes(lf, predicted_centroids)
             cf.crop_masks()
             #cf.show_masks()
             

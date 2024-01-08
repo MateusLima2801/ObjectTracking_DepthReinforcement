@@ -16,6 +16,9 @@ class Frame():
     def __init__(self,id:int, img: np.ndarray = None, read_labels: list[list[float]] = None, depth_array: np.ndarray = None):
         self.id = id
         self.img = img
+        self.img_bb = None
+        if type(self.img) is np.ndarray:
+            self.img_bb = BoundingBox(int(len(img[0])/2),int(len(img)/2),len(img[0]), len(img))
         self.depth_array = depth_array
         if read_labels != None:
             self.bboxes = self.init_bboxes(read_labels)
@@ -61,7 +64,7 @@ class Frame():
             if not iou_mask_current[i]:
                 bb.reset_id()
                 self.bboxes.append(bb)
-
+    
     @staticmethod
     def get_iou_mask_reduced( bboxes: list[BoundingBox], virtual: list[BoundingBox]):
         iou = np.zeros((len(bboxes), len(virtual)))
@@ -168,7 +171,7 @@ class Frame():
         return end - start
     
     def apply_confluence(self):
-        CONFLUENCE_THRESHOLD = 1
+        CONFLUENCE_THRESHOLD = 0.8
         bbs_proximity = {}
         bbs_neighbours = {}
         new_bboxes = []
@@ -193,7 +196,9 @@ class Frame():
             bbs_proximity.pop(bb_idx)
             new_bboxes.append(bb)
             for neightbour_id in bbs_neighbours[bb_idx]:
-                old_bboxes.pop(neightbour_id)
+                if neightbour_id in old_bboxes:
+                    old_bboxes.pop(neightbour_id)
+                    bbs_proximity.pop(neightbour_id)
 
         self.bboxes = new_bboxes
 

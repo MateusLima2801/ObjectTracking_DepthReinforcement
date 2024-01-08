@@ -125,5 +125,5 @@ class TrackingResult():
             self.frames[info[0]].bboxes.append(bb)
 
 
-# metrics = MOT_Evaluator.evaluate_annotations_result('data/track/uav0000355_00001_v_1/annotations.txt','data/VisDrone2019-MOT-test-dev/annotations/uav0000355_00001_v.txt', 100)
-# MOT_Evaluator.save_results_to_file(os.path.join('data/track/uav0000355_00001_v_1', "results.txt"), metrics, [1,0,0], 0.35, False)
+# metrics = MOT_Evaluator.evaluate_annotations_result('data\\track\\uav0000297_02761_v_9\\annotations.txt','data\\VisDrone2019-MOT-test-dev\\annotations\\uav0000297_02761_v.txt',50)
+# MOT_Evaluator.save_results_to_file(os.path.join('data\\track\\uav0000297_02761_v_9', "results.txt"), metrics, [1,1,0,1], 0.35, True, std = [1,1,1,1])

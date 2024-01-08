@@ -73,3 +73,6 @@ class Midas:
 
         depth_array = prediction.cpu().numpy()
         return depth_array
+    
+# m = Midas()
+# m.transform_img('data\\VisDrone2019-MOT-test-dev\\sequences\\uav0000297_02761_v\\0000001.jpg', 'demo')

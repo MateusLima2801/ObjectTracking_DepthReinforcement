@@ -50,6 +50,12 @@ class BoundingBox():
         return intersection_area / union_area
     
     @staticmethod
+    def divide_area(first: BoundingBox, second: BoundingBox ) -> float:
+        area1 = BoundingBox.get_area_esc(first)
+        area2 = BoundingBox.get_area_esc(second)
+        return area1/area2
+
+    @staticmethod
     def get_area_arr(bb: np.ndarray):
         return bb[:,:,2] * bb[:,:,3]
     

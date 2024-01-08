@@ -10,7 +10,7 @@ def main():
     SEQUENCE_FOLDER = os.path.join(SEQUENCES_FOLDER, SEQUENCE)
     GROUND_TRUTH_FILEPATH = os.path.join('data','VisDrone2019-MOT-test-dev','annotations', f'{SEQUENCE}.txt')
     # [FEATURE, POSITION, DEPTH, SHAPE]
-    weights = [[1,1,0,1]] #[[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
+    weights = [[1,0,0,0]] #[[1, 0, 0], [0.5,0.5,0],[0.5, 0, 0.5], [1/3,1/3,1/3]]
     supp = [True]#[False, True]
     matcher = Hungarian_Matching()
     midas = None
@@ -21,10 +21,11 @@ def main():
     detector = Detector()
     tracker = Tracker(matcher, midas, detector)
     STD_DEVIATIONS = [4.080301076630467,4.1468104706547075,0.4823281584040535,2.2988134815327603]
+    MIN_IOU = 0.0004
 
     for s in supp:
         for w in weights:
-            tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=50,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s, std_deviations = STD_DEVIATIONS)
+            tracker.track(SEQUENCE_FOLDER, fps=10, max_idx=2,delete_imgs=True,weights=w,ground_truth_filepath=GROUND_TRUTH_FILEPATH, conf=0.35, suppression=s, std_deviations = STD_DEVIATIONS, min_bbox_iou=MIN_IOU)
 
 if __name__ == "__main__":
     main()
