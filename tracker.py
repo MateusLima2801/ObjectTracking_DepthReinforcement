@@ -4,6 +4,7 @@ from src.features import Hungarian_Matching, Frame
 from src.frame import Frame
 from src.midas_loader import Midas
 from progress.bar import Bar
+from src.suppression import *
 import src.utils as utils
 import os
 import numpy as np
@@ -17,7 +18,7 @@ class Tracker:
 
     def track(self, source_folder:str, weights: list[float] = [1,1,1,1,1],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
-              ground_truth_filepath = None, conf = 0.6, suppression: bool = True, std_deviations = [1,1,1,1,1]):
+              ground_truth_filepath = None, conf = 0.6, suppression: Suppression = EmptySuppression, std_deviations = [1,1,1,1,1]):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -36,8 +37,7 @@ class Tracker:
                 depth_array = self.midas.get_depth_array(img)
             id = utils.get_number_from_filename(name)
             cf = Frame(id,img, detection_labels, depth_array)
-            if suppression:
-                cf.apply_parallel_non_max_suppression()
+            suppression.apply_suppression(cf)
             #print(f"Mean suppression time ({i}): {tt/i}s")
             #i+=1
             
