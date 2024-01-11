@@ -105,6 +105,8 @@ For the depth and position, centroid metric will be used as reference to compare
 - abolish weights, use only activation binary complements (DONE)
 - displacement doesn't work because we are trying to identificate a current bb with a previous one and the current doesn't have displacement to compare
 - dealing with distant objects overlapped too much: threshold IOU between object and frame and filtering by depth, basing the threshold in the detections of the frame
+- create a video from the annotations data to verify
+- use depth distribution in the object to analyse impact
 
 
 ## Occlusion
@@ -132,6 +134,11 @@ MOTP - Multi-Object Tracking Precision
 
 MOTA - Multi-Object Tracking Accuracy
 
+## Sequences
+
+|Sequence| Annotations are precise? | Evidence |
+|-|-|-|
+|
 
 ## References
 

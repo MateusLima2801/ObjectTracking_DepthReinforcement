@@ -15,6 +15,8 @@ class Frame():
 
     def __init__(self,id:int, img: np.ndarray = None, read_labels: list[list[float]] = None, depth_array: np.ndarray = None):
         self.id = id
+        self.name = None
+        if id > 0: self.name = utils.get_filename_from_number(id)
         self.img = img
         self.img_bb = None
         if type(self.img) is np.ndarray:
@@ -81,8 +83,9 @@ class Frame():
     def interpol(n, maxi, mini = 0):
         return min(max(mini,n),maxi-1)
     
-    def save_frame_and_bboxes_with_id(self, output_folder: str, filename: str, show_conf:bool = False, annotations_filename = "annotations.txt"):
-        self.annotate_frame(output_folder, annotations_filename)
+    def save_frame_and_bboxes_with_id(self, output_folder: str, filename: str, show_conf:bool = False, annotations_filename = "annotations.txt", annotate: bool = True):
+        if annotate:
+            self.annotate_frame(output_folder, annotations_filename)
 
         img_output = os.path.join(output_folder, "imgs", filename)
         copy = self.img.copy()
@@ -171,7 +174,7 @@ class Frame():
         return end - start
     
     def apply_confluence(self):
-        CONFLUENCE_THRESHOLD = 0.8
+        CONFLUENCE_THRESHOLD = 1
         bbs_proximity = {}
         bbs_neighbours = {}
         new_bboxes = []

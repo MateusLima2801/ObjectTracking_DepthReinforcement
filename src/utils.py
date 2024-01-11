@@ -25,10 +25,10 @@ def delete_folder(folder: str):
 def cast_list(test_list, data_type):
         return list(map(data_type, test_list))
 
-def get_img_from_file(source):
+def get_img_from_file(source: str) -> np.ndarray:
     return plt.imread(source)
 
-def turn_imgs_into_video(imgs_folder, video_filename:str, img_extension = "jpg", output_folder = 'data/track_video', delete_imgs: bool = False, fps: float = 20.0):
+def turn_imgs_into_video(imgs_folder, video_filename:str, img_extension = "jpg", output_folder = os.path.join('data','track_video'), delete_imgs: bool = False, fps: float = 20.0):
     images = [img for img in os.listdir(imgs_folder) if img.endswith(f'.{img_extension}')]
     images.sort(key=get_number_from_filename)
     frame = cv.imread(os.path.join(imgs_folder, images[0]))

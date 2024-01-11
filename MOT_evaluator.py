@@ -14,7 +14,7 @@ class CLEAR_Metrics:
         self.nr_gt_objects = nr_gt_objects
     
     def to_string(self) -> str:
-         return f'TRACKING METRICS:\n\nMOTP: {self.mot_precision}\nMOTA: {self.mot_accuracy}\n\nMisses: {self.misses}\nMismatches: {self.mismatches}\nFalse Positives: {self.false_positives}\nGroundTruth Objects: {self.nr_gt_objects}'
+         return f'TRACKING METRICS:\n\nMOTP: {self.mot_precision}\nMOTA: {self.mot_accuracy}\n\nMisses: {self.misses} ({self.misses/self.nr_gt_objects})\nMismatches: {self.mismatches} ({self.mismatches/self.nr_gt_objects})\nFalse Positives: {self.false_positives} ({self.false_positives/self.nr_gt_objects})\nGroundTruth Objects: {self.nr_gt_objects}'
 
 class MOT_Evaluator():
     # arg: distance threshold (in pixels)
@@ -109,7 +109,7 @@ class MOT_Evaluator():
         return metrics
     
 class TrackingResult():
-    def __init__(self, annotations_file_path: str):
+    def __init__(self, annotations_file_path: str, imgs_file_path: str = ''):
         self.frames: dict[int,Frame] = {}
 
         f = open(annotations_file_path, "r")
@@ -119,11 +119,27 @@ class TrackingResult():
             info = line.replace('\n', '').split(',')
             info[:-1] = cast_list(info[:-1], int)
             info[-1] = float(info[-1])
-            bb = BoundingBox(int((info[2]+info[4])/2), int((info[3]+info[5])/2), info[4], info[5], info[6], id=info[1])
-            if info[0] not in self.frames.keys():
-                self.frames[info[0]] = Frame(info[0])
-            self.frames[info[0]].bboxes.append(bb)
+            bb = BoundingBox(info[2]+int(info[4]/2), info[3]+int(info[5]/2), info[4], info[5], info[6], id=info[1])
+            f_id = info[0]
+            if f_id not in self.frames.keys():
+                img = None
+                if len(imgs_file_path) > 0 and os.path.isdir(imgs_file_path):
+                    img_path = os.path.join(imgs_file_path, get_filename_from_number(f_id))
+                    img = get_img_from_file(img_path)
+                self.frames[f_id] = Frame(f_id, img)
+            self.frames[f_id].bboxes.append(bb)
 
+    def generate_video(self, output_folder: str, delete_imgs: bool = True, fps: int = 10, max_idx: int = None):
+        imgs_folder = os.path.join(output_folder, "imgs")
+        os.makedirs(imgs_folder, exist_ok=True)
 
+        maximum = len(self.frames.values())
+        if max_idx is not None:
+            maximum = min(maximum, max_idx)
+
+        for frame in self.frames.values():
+            if frame.id > maximum: continue
+            frame.save_frame_and_bboxes_with_id(output_folder, frame.name, annotate = False)
+        turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split(file_separator())[-1] + "_0", delete_imgs=delete_imgs, fps=fps)
 # metrics = MOT_Evaluator.evaluate_annotations_result('data\\track\\uav0000297_02761_v_9\\annotations.txt','data\\VisDrone2019-MOT-test-dev\\annotations\\uav0000297_02761_v.txt',50)
 # MOT_Evaluator.save_results_to_file(os.path.join('data\\track\\uav0000297_02761_v_9', "results.txt"), metrics, [1,1,0,1], 0.35, True, std = [1,1,1,1])
