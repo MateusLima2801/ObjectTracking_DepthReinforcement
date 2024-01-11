@@ -26,8 +26,6 @@ class Frame():
             self.bboxes = self.init_bboxes(read_labels)
         else: self.bboxes: list[BoundingBox] = []
         self.masks: list
-        
-        #self.apply_parallel_non_max_suppression()
 
     def crop_masks(self):
         # print(img)
@@ -123,5 +121,4 @@ class Frame():
 # f = Frame(1)
 # f.bboxes = [BoundingBox(35+134/2,466+181/2,134,181, conf=0.8), BoundingBox(35+133/2,468+184/2,133,184, conf=0.5),
 #             BoundingBox(100+20/2,100+30/2,20,30, conf=0.4),BoundingBox(120+20/2,130+30/2,20,30, conf=0.42)]
-# f.apply_confluence()
 
