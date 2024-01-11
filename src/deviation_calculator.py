@@ -4,7 +4,7 @@ import os
 import shutil
 import numpy as np
 import json
-from src.features import Feature_Matcher
+from src.matchers.feature_matcher import Feature_Matcher
 from src.job_workers import JobWorkers
 from src.frame import Frame
 from src.midas_loader import Midas
@@ -130,7 +130,7 @@ class DepthDeviationCalculator(DeviationCalculator):
         return math.sqrt(square_sum / counter)
     
     def get_centroid_depth(self, depth_array: np.ndarray, bb: BoundingBox) -> float:
-        return float(depth_array[Frame.interpol(bb.y,len(depth_array)), Frame.interpol(bb.x, len(depth_array[0]))])
+        return float(depth_array[utils.interpol(bb.y,len(depth_array)), utils.interpol(bb.x, len(depth_array[0]))])
 
     def iterate_depth_retrieval(self, name: str, args):
         img_source, frame_depths, bar, sequence, lines_by_frame = args

@@ -1,6 +1,6 @@
-from MOT_evaluator import MOT_Evaluator
-from detector import Detector
-from src.features import Hungarian_Matching, Frame
+from src.MOT_evaluator import MOT_Evaluator
+from src.detector import Detector
+from src.hungarian_matching import Hungarian_Matching
 from src.frame import Frame
 from src.midas_loader import Midas
 from progress.bar import Bar
@@ -18,15 +18,14 @@ class Tracker:
 
     def track(self, source_folder:str, weights: list[float] = [1,1,1,1,1],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
-              ground_truth_filepath = None, conf = 0.6, suppression: Suppression = EmptySuppression, std_deviations = [1,1,1,1,1]):
+              ground_truth_filepath = None, conf = 0.6, suppression: Suppression = EmptySuppression(), std_deviations = [1,1,1,1,1]):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
-        #i = 1
-        #tt = 0
         if max_idx is not None:
             img_names = img_names[:max_idx]
         bar = Bar("Tracking through...", max = len(img_names))
+        suppression.init_time_count()
         for name in img_names:
             img_path = os.path.join(source_folder, name)
             img = Tracker.get_img_tensor(source_folder, name)
@@ -38,8 +37,6 @@ class Tracker:
             id = utils.get_number_from_filename(name)
             cf = Frame(id,img, detection_labels, depth_array)
             suppression.apply_suppression(cf)
-            #print(f"Mean suppression time ({i}): {tt/i}s")
-            #i+=1
             
             if lf == None:
                 cf.crop_masks()
@@ -69,6 +66,7 @@ class Tracker:
             cf.save_frame_and_bboxes_with_id(output_folder, name)
             lf = cf
             bar.next()
+        suppression.end_time_count()
         utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split(utils.file_separator())[-1], delete_imgs=delete_imgs, fps=fps)
         
         if ground_truth_filepath != None:
@@ -91,7 +89,3 @@ class Tracker:
     @staticmethod
     def get_img_tensor(source_folder:str, name:str):
         return utils.get_img_from_file(os.path.join(source_folder, name))
-# FRAMES_FOLDER = 'data/VisDrone2019-SOT-train/sequences/uav0000003_00000_s'
-# t = Tracker(FRAMES_FOLDER)
-# t.track()
-# exit(0)

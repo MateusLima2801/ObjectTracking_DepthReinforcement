@@ -5,15 +5,18 @@ from src.vector import Vector
 
 class BoundingBox():
     
-    def __init__(self, x: int, y:int, w:int, h:int, conf:float=0, depth: float = 0, id: int = -1):
+    def __init__(self, x: int, y:int, w:int, h:int, conf:float=0, depth_array: np.ndarray = None, id: int = -1):
         self.w = w #width
         self.h = h #height
         self.update_position(x,y)
         self.conf = conf    
         self.id = id
-        self.depth = depth
-        self.virtual = False
-        self.age = 0
+        self.depth = 0
+        self.depth_array = None
+        if type(depth_array) == np.ndarray:
+            self.depth = float(depth_array[utils.interpol(y,depth_array.shape[0]), utils.interpol(x,depth_array.shape[1])])
+            self.depth_array = depth_array[utils.interpol(self.y_ur, depth_array.shape[0]):utils.interpol(self.y_ll, depth_array.shape[0]),
+                                           utils.interpol(self.x_ll, depth_array.shape[1]):utils.interpol(self.x_ur, depth_array.shape[1])]
     
     def update_position(self, x: int, y:int, virtual:bool = False):
         self.x = x #x_centroid
@@ -22,9 +25,6 @@ class BoundingBox():
         self.y_ll = int(self.y + self.h/2)
         self.x_ur = int(self.x + self.w/2)
         self.y_ur = int(self.y - self.h/2)
-        if virtual:
-            self.virtual = virtual
-            self.age+=1
     
     def reset_id(self):
         self.id =-1

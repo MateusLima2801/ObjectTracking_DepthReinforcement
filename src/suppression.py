@@ -1,34 +1,39 @@
 from time import time
 import numpy as np
-from bounding_box import BoundingBox
-from frame import Frame
+from src.bounding_box import BoundingBox
+from src.frame import Frame
 
 class Suppression():
     suppression_type: str
-
-    @staticmethod
-    def apply_suppression(frame: Frame) -> float:
-        start = time()
-        Suppression.do_apply_suppression()
-        end = time()
-        return start - end
+    supp_times: list[float]
+    mean_supp_time = 0
     
-    @staticmethod
-    def do_apply_suppression(frame: Frame):
+    def apply_suppression(self, frame: Frame):
+        start = time()
+        self.do_apply_suppression(frame)
+        end = time()
+        delta = end - start
+        self.supp_times.append(delta)
+    
+    def do_apply_suppression(self, frame: Frame):
         raise NotImplementedError
     
+    def init_time_count(self):
+        self.supp_times = []
+                
+    def end_time_count(self):
+        self.mean_supp_time = np.mean(self.supp_times)
+        
 class EmptySuppression(Suppression):
     suppression_type = "None"
 
-    @staticmethod
-    def do_apply_suppression(frame: Frame):
+    def do_apply_suppression(self, frame: Frame):
         pass
     
 class NMS(Suppression):
     suppression_type = "Non-Maximum Suppression"
     # O(n^2)
-    @staticmethod
-    def do_apply_suppression(frame: Frame):
+    def do_apply_suppression(self, frame: Frame):
         if len(frame.bboxes) <= 1: return 
         keep: list[BoundingBox] = []
         frame.bboxes = sorted(frame.bboxes, key=lambda bb: bb.conf, reverse=True)
@@ -48,7 +53,7 @@ class NMS(Suppression):
 class ParallelNMS(Suppression):
     suppression_type = "Parallel Non-Maximum Suppression"
     # O(n)
-    def do_apply_suppression(frame: Frame):
+    def do_apply_suppression(self, frame: Frame):
         if len(frame.bboxes) <= 1: return
         n = len(frame.bboxes)
         s = list(map(lambda bb: bb.conf, frame.bboxes))
@@ -77,12 +82,12 @@ class ParallelNMS(Suppression):
                 frame.bboxes.pop(i)
 
 class Confluence(Suppression):
-    suppression_type = "Confluence"
-
-    @staticmethod
-    def apply_suppression(frame: Frame):
+    def __init__(self, confluence_threshold: float = 1):
+        self.confluence_threshold: float = confluence_threshold
+        self.suppression_type = f"Confluence - Threshold: {self.confluence_threshold}"
+        
+    def do_apply_suppression(self, frame: Frame):
         if len(frame.bboxes) <= 1: return
-        CONFLUENCE_THRESHOLD = 1
         bbs_proximity = {}
         bbs_neighbours = {}
         new_bboxes = []
@@ -94,7 +99,7 @@ class Confluence(Suppression):
             for i_other, bb_other in enumerate(frame.bboxes):
                 if bb_other == bb: continue
                 prox = Confluence.calculate_normalized_confluence(frame, bb, bb_other)
-                if prox < CONFLUENCE_THRESHOLD:
+                if prox < self.confluence_threshold:
                     prox_sum += prox
                     bbs_neighbours[i].append(i_other)
             bbs_proximity[i] = prox_sum*(1-bb.conf)

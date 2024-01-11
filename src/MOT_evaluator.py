@@ -1,5 +1,6 @@
 from __future__ import annotations
-from src.features import Hungarian_Matching, Position_Matcher
+from src.matchers.position_matcher import Position_Matcher
+from src.hungarian_matching import Hungarian_Matching
 from src.frame import Frame
 from src.utils import  *
 from src.bounding_box import BoundingBox
@@ -96,7 +97,7 @@ class MOT_Evaluator():
         f.write(metrics.to_string())
         f.write(f"\n\nWeights:\n\nFeatures: {weights[0]}\nPosition: {weights[1]}\nDepth: {weights[2]}\nShape: {weights[3]}")
         f.write(f"\n\nConf: {conf}")
-        f.write(f"\n\nSuppression: {suppression.suppression_type}")
+        f.write(f"\n\nSuppression: {suppression.suppression_type} (Mean time: {suppression.mean_supp_time}s)")
         f.write(f"\n\nStandard Deviation Weights:\n\nFeatures: {std[0]}\nPosition: {std[1]}\nDepth: {std[2]}\nShape: {std[3]}")
         f.close()
         
@@ -130,7 +131,7 @@ class TrackingResult():
                 self.frames[f_id] = Frame(f_id, img)
             self.frames[f_id].bboxes.append(bb)
 
-    def generate_video(self, output_folder: str, delete_imgs: bool = True, fps: int = 10, max_idx: int = None):
+    def print_visual_result(self, output_folder: str, delete_imgs: bool = True, fps: int = 10, max_idx: int = None, gen_video: bool = True):
         imgs_folder = os.path.join(output_folder, "imgs")
         os.makedirs(imgs_folder, exist_ok=True)
 
@@ -141,6 +142,7 @@ class TrackingResult():
         for frame in self.frames.values():
             if frame.id > maximum: continue
             frame.save_frame_and_bboxes_with_id(output_folder, frame.name, annotate = False)
-        turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split(file_separator())[-1] + "_0", delete_imgs=delete_imgs, fps=fps)
+        if gen_video:
+            turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split(file_separator())[-1] + "_0", delete_imgs=delete_imgs, fps=fps)
 # metrics = MOT_Evaluator.evaluate_annotations_result('data\\track\\uav0000297_02761_v_9\\annotations.txt','data\\VisDrone2019-MOT-test-dev\\annotations\\uav0000297_02761_v.txt',50)
 # MOT_Evaluator.save_results_to_file(os.path.join('data\\track\\uav0000297_02761_v_9', "results.txt"), metrics, [1,1,0,1], 0.35, True, std = [1,1,1,1])

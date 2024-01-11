@@ -11,19 +11,15 @@ from src.bounding_box import BoundingBox
 
 class Frame():
     THRESHOLD_IOU = 0.7
-    MAX_AGE = 10
 
     def __init__(self,id:int, img: np.ndarray = None, read_labels: list[list[float]] = None, depth_array: np.ndarray = None):
         self.id = id
         self.name = None
         if id > 0: self.name = utils.get_filename_from_number(id)
         self.img = img
-        self.img_bb = None
-        if type(self.img) is np.ndarray:
-            self.img_bb = BoundingBox(int(len(img[0])/2),int(len(img)/2),len(img[0]), len(img))
         self.depth_array = depth_array
         if read_labels != None:
-            self.bboxes = self.init_bboxes(read_labels)
+            self.bboxes = self.init_bboxes(read_labels, self.depth_array)
         else: self.bboxes: list[BoundingBox] = []
         self.masks: list
 
@@ -47,39 +43,11 @@ class Frame():
             plt.imshow(mask)
             plt.show(block=True)
     
-    def init_bboxes(self, read_labels: list[list[float]]) -> list[BoundingBox]:
+    def init_bboxes(self, read_labels: list[list[float]], depth_array: np.ndarray) -> list[BoundingBox]:
         bboxes = []
         for label in read_labels:
-            depth = float(self.depth_array[Frame.interpol(label[1],len(self.depth_array)), Frame.interpol(label[0], len(self.depth_array[0]))])
-            bboxes.append(BoundingBox(label[0],label[1],label[2],label[3], label[4],depth))
+            bboxes.append(BoundingBox(label[0],label[1],label[2],label[3], label[4],depth_array=depth_array))
         return bboxes
-
-    def choose_virtual_bboxes(self, lf: Frame, predicted_centroids: np.ndarray):
-        virtual = lf.bboxes.copy()
-        for i in range(len(virtual)):
-            virtual[i].update_position(x=predicted_centroids[i,0], y=predicted_centroids[i,1], virtual=True)
-        virtual = list(filter(lambda bb: bb.age < Frame.MAX_AGE, virtual))
-        iou_mask_current = Frame.get_iou_mask_reduced(self.bboxes, virtual)
-        for i, bb in enumerate(virtual):
-            if not iou_mask_current[i]:
-                bb.reset_id()
-                self.bboxes.append(bb)
-    
-    @staticmethod
-    def get_iou_mask_reduced( bboxes: list[BoundingBox], virtual: list[BoundingBox]):
-        iou = np.zeros((len(bboxes), len(virtual)))
-        for i in range(len(iou)):
-            for j in range(len(iou[0])):
-                iou[i,j] = BoundingBox.get_intersection_over_union_esc(bboxes[i], virtual[j])
-        iou_mask = iou > Frame.THRESHOLD_IOU
-        iou_mask_reduced = iou_mask[0]
-        for i in range(1, len(iou_mask)):
-            iou_mask_reduced = np.logical_or(iou_mask_reduced,iou_mask[i])
-        return iou_mask_reduced
-    
-    @staticmethod
-    def interpol(n, maxi, mini = 0):
-        return min(max(mini,n),maxi-1)
     
     def save_frame_and_bboxes_with_id(self, output_folder: str, filename: str, show_conf:bool = False, annotations_filename = "annotations.txt", annotate: bool = True):
         if annotate:

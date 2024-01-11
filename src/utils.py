@@ -88,6 +88,9 @@ def file_separator():
     elif "Windows" in sys:
         return '\\'
     
+def interpol(n, maxi, mini = 0):
+    return min(max(mini,n),maxi-1)
+
 # Dot Dictionary
 class dotdict(dict):
     """dot.notation access to dictionary attributes.
@@ -95,3 +98,4 @@ class dotdict(dict):
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
+

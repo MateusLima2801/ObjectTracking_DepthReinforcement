@@ -105,9 +105,9 @@ For the depth and position, centroid metric will be used as reference to compare
 - abolish weights, use only activation binary complements (DONE)
 - displacement doesn't work because we are trying to identificate a current bb with a previous one and the current doesn't have displacement to compare
 - dealing with distant objects overlapped too much: threshold IOU between object and frame and filtering by depth, basing the threshold in the detections of the frame
-- create a video from the annotations data to verify
+- create a video from the annotations data to verify (done and rectified)
 - use depth distribution in the object to analyse impact
-
+- tune the weights
 
 ## Occlusion
 - displacement can be only used with optical flow replacing position as predicted position
@@ -118,6 +118,8 @@ For the depth and position, centroid metric will be used as reference to compare
 
 ## Tune the weights
 Use ground truth annotations to calculate the errors in metrics (depth, position, features) between the same object in different frames and divide an equipotent weight for the standard deviation over this errors. Each weight would be divided by the standard deviation calculated for its metric over a set of sequences.(done)
+
+The article 3 defends weigths baesd in feature stability, beyond the standard deviations there should be an unbaleced wieght vector for prioritizing stable features 
 
 ## Problems
 
@@ -134,18 +136,14 @@ MOTP - Multi-Object Tracking Precision
 
 MOTA - Multi-Object Tracking Accuracy
 
-## Sequences
-
-|Sequence| Annotations are precise? | Evidence |
-|-|-|-|
-|
-
 ## References
 
 1. H. Lee, J. -S. Lee and H. -C. Choi, "Parallelization of Non-Maximum Suppression," in IEEE Access, vol. 9, pp. 166579-166587, 2021, doi: 10.1109/ACCESS.2021.3134639.
 
 2. Bernardin, K., Stiefelhagen, R. Evaluating Multiple Object Tracking Performance: The CLEAR MOT Metrics. J Image Video Proc 2008, 246309 (2008). https://doi.org/10.1155/2008/246309
 
+3. DEPTH MAP BASED OBJECT TRACKING AND 3D POSITIONING
+FOR NON-STATIC CAMERA
 ## Links
 
 1. VisDrone: https://github.com/VisDrone/VisDrone-Dataset
