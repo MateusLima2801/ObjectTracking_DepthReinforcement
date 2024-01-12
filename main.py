@@ -12,7 +12,7 @@ def main():
     SEQUENCE_FOLDER = os.path.join(SEQUENCES_FOLDER, SEQUENCE)
     DEPTH_SEQUENCE_FOLDER = os.path.join('data', 'depth_track')
     # [FEATURE, POSITION, DEPTH, SHAPE, DEPTH_DISTRIBUTION]
-    weights = [[1,1,0,1,0],[1,1,1,1,0],[1,1,0,1,1]]
+    weights = [[1,1,0,1,0]]
     supp = [Confluence()]
     matcher = Hungarian_Matching()
     midas = None
@@ -23,7 +23,7 @@ def main():
     detector = Detector()
     tracker = Tracker(matcher, midas, detector)
     STD_DEVIATIONS = [4.080301076630467,4.1468104706547075,0.4823281584040535,2.2988134815327603,1]
-    sequences = ['uav0000009_03358_v','uav0000077_00720_v', 'uav0000120_04775_v']
+    sequences = ['uav0000009_03358_v','uav0000077_00720_v', 'uav0000120_04775_v', 'uav0000201_00000_v', 'uav0000297_02761_v', 'uav0000119_02301_v']
     done = [('uav0000009_03358_v',0,0), ('uav0000009_03358_v',1,0)]#,('uav0000077_00720_v',1),('uav0000120_04775_v', 0)]
     for sup in supp:
         for seq in sequences:
