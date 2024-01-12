@@ -106,6 +106,10 @@ def decompress_file(file: str, output_folder: str) -> bool:
         return True
     return False
 
+def safely_divide(first, second):
+    if second  == 0: return 0
+    else: return first/second
+     
 # Dot Dictionary
 class dotdict(dict):
     """dot.notation access to dictionary attributes.

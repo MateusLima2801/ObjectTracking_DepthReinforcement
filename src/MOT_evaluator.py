@@ -17,7 +17,7 @@ class CLEAR_Metrics:
         self.nr_gt_objects = nr_gt_objects
     
     def to_string(self) -> str:
-         return f'TRACKING METRICS:\n\nMOTP: {self.mot_precision}\nMOTA: {self.mot_accuracy}\n\nMisses: {self.misses} ({self.misses/self.nr_gt_objects})\nMismatches: {self.mismatches} ({self.mismatches/self.nr_gt_objects})\nFalse Positives: {self.false_positives} ({self.false_positives/self.nr_gt_objects})\nGroundTruth Objects: {self.nr_gt_objects}'
+         return f'TRACKING METRICS:\n\nMOTP: {self.mot_precision}\nMOTA: {self.mot_accuracy}\n\nMisses: {self.misses} ({safely_divide(self.misses,self.nr_gt_objects)})\nMismatches: {self.mismatches} ({safely_divide(self.mismatches,self.nr_gt_objects)})\nFalse Positives: {self.false_positives} ({safely_divide(self.false_positives,self.nr_gt_objects)})\nGroundTruth Objects: {self.nr_gt_objects}'
 
 class MOT_Evaluator():
     # arg: distance threshold (in pixels)
@@ -77,11 +77,8 @@ class MOT_Evaluator():
                 number_of_gt_objects += len(groundTruth.frames[i].bboxes)
                 prev_id_mapping = id_mapping
         
-        if number_of_matches == 0: mot_precision = 0
-        else: mot_precision = matches_distances / number_of_matches
-        
-        if number_of_gt_objects == 0: mot_accuracy == 1
-        else: mot_accuracy = 1 - ( (mismatches + false_positives + misses) / number_of_gt_objects)
+        mot_precision = safely_divide(matches_distances, number_of_matches)
+        mot_accuracy = 1 - safely_divide(mismatches + false_positives + misses, number_of_gt_objects)
         
         return CLEAR_Metrics(mot_precision, mot_accuracy, misses, mismatches, false_positives, number_of_gt_objects)
     

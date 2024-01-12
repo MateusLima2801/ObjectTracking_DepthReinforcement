@@ -31,7 +31,7 @@ def main():
                 if (seq, w[2],w[4]) in done: continue
                 ground_truth_filepath = os.path.join('data','VisDrone2019-MOT-test-dev','annotations', f'{seq}.txt')
                 seq_path = os.path.join(SEQUENCES_FOLDER, seq)
-                tracker.track(seq_path,DEPTH_SEQUENCE_FOLDER,fps=10, max_idx=1,delete_imgs=True,weights=w,ground_truth_filepath=ground_truth_filepath, conf=0.35, suppression=sup, std_deviations = STD_DEVIATIONS)
+                tracker.track(seq_path,DEPTH_SEQUENCE_FOLDER,fps=10, max_idx=400,delete_imgs=True,weights=w,ground_truth_filepath=ground_truth_filepath, conf=0.35, suppression=sup, std_deviations = STD_DEVIATIONS)
 
 if __name__ == "__main__":
     main()
