@@ -94,7 +94,7 @@ def interpol(n, maxi, mini = 0):
 def compress_folder(folder: str) -> bool:
     if os.path.isdir(folder):
         cmd = f'tar -czvf {folder}.tar.gz -C {folder} .'
-        os.system(f'cmd /c "{cmd}"')
+        os.system(wrap_cmd(cmd))
         return True
     return False
 
@@ -102,14 +102,22 @@ def decompress_file(file: str, output_folder: str) -> bool:
     os.makedirs(output_folder, exist_ok=True)
     if os.path.isfile(file) and file.endswith('tar.gz'):
         cmd = f'tar -xzvf {file} -C {output_folder}'
-        os.system(f'cmd /c "{cmd}"')
+        os.system(wrap_cmd(cmd))
         return True
+    
     return False
 
 def safely_divide(first, second):
     if second  == 0: return 0
     else: return first/second
      
+def wrap_cmd(cmd: str):
+    sys = system()
+    if "Linux" in sys or "Darwin" in sys:
+        return cmd
+    elif "Windows" in sys:
+        return f'cmd /c "{cmd}"'
+
 # Dot Dictionary
 class dotdict(dict):
     """dot.notation access to dictionary attributes.
