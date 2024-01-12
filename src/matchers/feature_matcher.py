@@ -7,6 +7,8 @@ import numpy as np
 import src.utils as utils
 
 class Feature_Matcher(Matcher):
+    matcher_type: str = "Visual Features"
+    
     def __init__(self):
         self.sift = cv.SIFT_create()
         self.bf = cv.BFMatcher()

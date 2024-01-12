@@ -4,6 +4,8 @@ from src.matchers.matcher import Matcher
 from src import utils
 
 class Depth_Matcher(Matcher):
+    matcher_type: str = "Centroid Depth"
+    
     @staticmethod
     def generate_cost_matrix(f1: Frame, f2: Frame, normalize: bool = False):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))

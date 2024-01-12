@@ -71,7 +71,7 @@ class Tracker:
         
         if ground_truth_filepath != None:
             metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
-            MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights, conf, suppression, std_deviations)
+            MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights, conf, suppression, std_deviations, self.matcher.matchers, max_idx)
     
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:

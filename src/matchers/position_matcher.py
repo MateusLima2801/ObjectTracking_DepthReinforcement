@@ -6,6 +6,8 @@ from src.matchers.matcher import Matcher
 from src import utils
 
 class Position_Matcher(Matcher):
+    matcher_type: str = "Position"
+    
     # square of centroids distance normalized
     # can be optimized to avoid calculus repetition
     @staticmethod

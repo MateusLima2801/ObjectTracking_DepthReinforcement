@@ -1,4 +1,5 @@
 from __future__ import annotations
+from src.matchers.matcher import Matcher
 from src.matchers.position_matcher import Position_Matcher
 from src.hungarian_matching import Hungarian_Matching
 from src.frame import Frame
@@ -92,13 +93,18 @@ class MOT_Evaluator():
         return mapping
     
     @staticmethod
-    def save_results_to_file(output_path, metrics: CLEAR_Metrics, weights: list[float], conf: float, suppression: Suppression, std: list[float]):
+    def save_results_to_file(output_path, metrics: CLEAR_Metrics, weights: list[float], conf: float, suppression: Suppression, std: list[float], matchers: list[Matcher], max_idx: int):
         f = open(output_path, "w")
         f.write(metrics.to_string())
-        f.write(f"\n\nWeights:\n\nFeatures: {weights[0]}\nPosition: {weights[1]}\nDepth: {weights[2]}\nShape: {weights[3]}")
+        weights_str = "\n\nWeights:\n"
+        for i, mat in enumerate(matchers): weights_str += f'\n{mat.matcher_type}: {weights[i]}'
+        f.write(weights_str)
         f.write(f"\n\nConf: {conf}")
         f.write(f"\n\nSuppression: {suppression.suppression_type} (Mean time: {suppression.mean_supp_time}s)")
-        f.write(f"\n\nStandard Deviation Weights:\n\nFeatures: {std[0]}\nPosition: {std[1]}\nDepth: {std[2]}\nShape: {std[3]}")
+        std_str = "\n\nStandard Deviation Weights:\n"
+        for i, mat in enumerate(matchers): std_str += f'\n{mat.matcher_type}: {std[i]}'
+        f.write(std_str)
+        f.write(f"\n\nMax idx: {max_idx}")
         f.close()
         
     @staticmethod

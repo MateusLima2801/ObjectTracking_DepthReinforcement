@@ -6,6 +6,8 @@ from scipy.stats import wasserstein_distance
 from src.matchers.matcher import Matcher
 
 class Depth_Distribution_Matcher(Matcher):
+    matcher_type: str = "Depth Distribution"
+    
     @staticmethod
     def generate_cost_matrix(f1: Frame, f2: Frame, normalize: bool = False):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))

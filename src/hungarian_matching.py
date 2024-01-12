@@ -11,7 +11,7 @@ from src.frame import Frame
 
 class Hungarian_Matching():
     def __init__(self):
-        self.matchers: list[Matcher] = [Feature_Matcher(), Position_Matcher, Depth_Distribution_Matcher, Shape_Matcher]
+        self.matchers: list[Matcher] = [Feature_Matcher(), Position_Matcher, Depth_Matcher, Shape_Matcher, Depth_Distribution_Matcher]
 
     def generate_cost_matrix(self,fr1: Frame, fr2: Frame, weights: list[float], std_deviations: list[float]):
         cost = np.zeros((len(fr1.bboxes), len(fr2.bboxes)))

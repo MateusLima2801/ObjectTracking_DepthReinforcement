@@ -1,7 +1,6 @@
 from __future__ import annotations
 import numpy as np
 import src.utils as utils
-from src.vector import Vector
 
 class BoundingBox():
     
@@ -18,7 +17,7 @@ class BoundingBox():
             self.depth_array = depth_array[utils.interpol(self.y_ur, depth_array.shape[0]):utils.interpol(self.y_ll, depth_array.shape[0]),
                                            utils.interpol(self.x_ll, depth_array.shape[1]):utils.interpol(self.x_ur, depth_array.shape[1])]
     
-    def update_position(self, x: int, y:int, virtual:bool = False):
+    def update_position(self, x: int, y:int):
         self.x = x #x_centroid
         self.y = y #y_centroid
         self.x_ll = int(self.x - self.w/2)
