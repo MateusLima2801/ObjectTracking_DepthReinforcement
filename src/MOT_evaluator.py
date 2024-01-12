@@ -76,8 +76,13 @@ class MOT_Evaluator():
  
                 number_of_gt_objects += len(groundTruth.frames[i].bboxes)
                 prev_id_mapping = id_mapping
-        mot_precision = matches_distances / number_of_matches
-        mot_accuracy = 1 - ( (mismatches + false_positives + misses) / number_of_gt_objects)
+        
+        if number_of_matches == 0: mot_precision = 0
+        else: mot_precision = matches_distances / number_of_matches
+        
+        if number_of_gt_objects == 0: mot_accuracy == 1
+        else: mot_accuracy = 1 - ( (mismatches + false_positives + misses) / number_of_gt_objects)
+        
         return CLEAR_Metrics(mot_precision, mot_accuracy, misses, mismatches, false_positives, number_of_gt_objects)
     
     @staticmethod

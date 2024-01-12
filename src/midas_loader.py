@@ -1,3 +1,4 @@
+import json
 import cv2
 import torch
 import matplotlib.pyplot as plt
@@ -58,7 +59,7 @@ class Midas:
         return depth_array
     
 
-    def get_depth_array(self, img: np.ndarray):
+    def get_depth_array(self, img: np.ndarray) -> np.ndarray:
         input_batch = self.transform(img).to(self.device)
 
         with torch.no_grad():
@@ -74,5 +75,22 @@ class Midas:
         depth_array = prediction.cpu().numpy()
         return depth_array
     
+    def try_get_or_create_depth_array(self, img: np.ndarray, img_name: str, repository_folder: str) -> np.ndarray:
+        json_path = os.path.join(repository_folder, f'{img_name.split(".")[0]}.json')
+        
+        if os.path.isfile(json_path):
+            f = open(json_path)
+            content = json.load(f)
+            f.close()
+            return np.array(content['depth-array'])
+        else:
+            depth_array = self.get_depth_array(img)
+            content = { 'depth-array': depth_array.tolist()}
+            f = open(json_path, "w")
+            json.dump(content, f)
+            f.close()
+            return depth_array
+            
+            
 # m = Midas()
 # m.transform_img('data\\VisDrone2019-MOT-test-dev\\sequences\\uav0000297_02761_v\\0000001.jpg', 'demo')

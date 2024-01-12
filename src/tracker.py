@@ -1,3 +1,4 @@
+import shutil
 from src.MOT_evaluator import MOT_Evaluator
 from src.detector import Detector
 from src.hungarian_matching import Hungarian_Matching
@@ -16,12 +17,20 @@ class Tracker:
         self.midas = midas
         self.detector = detector
 
-    def track(self, source_folder:str, weights: list[float] = [1,1,1,1,1],
+    def track(self, source_folder:str, depth_base_folder: str, weights: list[float] = [1,1,1,1,1],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
               ground_truth_filepath = None, conf = 0.6, suppression: Suppression = EmptySuppression(), std_deviations = [1,1,1,1,1]):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
+        
+        sequence_name = source_folder.split(utils.file_separator())[-1]
+        depth_source_folder = os.path.join(depth_base_folder, sequence_name)
+        os.makedirs(depth_base_folder, exist_ok=True)
+        if f'{sequence_name}.tar.gz' in os.listdir(depth_base_folder):
+            utils.decompress_file(os.path.join(depth_base_folder,f'{sequence_name}.tar.gz'), depth_source_folder)
+        else: os.makedirs(depth_source_folder, exist_ok=True)
+        
         if max_idx is not None:
             img_names = img_names[:max_idx]
         bar = Bar("Tracking through...", max = len(img_names))
@@ -32,8 +41,9 @@ class Tracker:
             detection_labels = self.detector.detect_and_read_labels(img_path, conf)
             if len(detection_labels) <= 0: continue
             depth_array = np.zeros((img.shape[0], img.shape[1], 1))
-            if weights[2] > 0:
-                depth_array = self.midas.get_depth_array(img)
+            if weights[2] > 0 or weights[4] > 0:
+                # depth_array = self.midas.get_depth_array(img)
+                depth_array = self.midas.try_get_or_create_depth_array(img, name, depth_source_folder)
             id = utils.get_number_from_filename(name)
             cf = Frame(id,img, detection_labels, depth_array)
             suppression.apply_suppression(cf)
@@ -67,6 +77,8 @@ class Tracker:
             lf = cf
             bar.next()
         suppression.end_time_count()
+        utils.compress_folder(depth_source_folder)
+        shutil.rmtree(depth_source_folder)
         utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split(utils.file_separator())[-1], delete_imgs=delete_imgs, fps=fps)
         
         if ground_truth_filepath != None:

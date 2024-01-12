@@ -91,6 +91,21 @@ def file_separator():
 def interpol(n, maxi, mini = 0):
     return min(max(mini,n),maxi-1)
 
+def compress_folder(folder: str) -> bool:
+    if os.path.isdir(folder):
+        cmd = f'tar -czvf {folder}.tar.gz -C {folder} .'
+        os.system(f'cmd /c "{cmd}"')
+        return True
+    return False
+
+def decompress_file(file: str, output_folder: str) -> bool:
+    os.makedirs(output_folder, exist_ok=True)
+    if os.path.isfile(file) and file.endswith('tar.gz'):
+        cmd = f'tar -xzvf {file} -C {output_folder}'
+        os.system(f'cmd /c "{cmd}"')
+        return True
+    return False
+
 # Dot Dictionary
 class dotdict(dict):
     """dot.notation access to dictionary attributes.
@@ -98,4 +113,3 @@ class dotdict(dict):
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
-
