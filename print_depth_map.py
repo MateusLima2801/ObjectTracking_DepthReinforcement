@@ -1,4 +1,5 @@
 
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 from scipy.stats import wasserstein_distance
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ import src.utils as utils
 # z = y_img
 
 m = Midas()
-img = utils.get_img_from_file('data\\VisDrone2019-MOT-test-dev\\sequences\\uav0000077_00720_v\\0000329.jpg')
+img = utils.get_img_from_file('data\\VisDrone2019-MOT-test-dev\\sequences\\uav0000009_03358_v\\0000003.jpg')
 depth = m.try_get_or_create_depth_array(img, 'test0003.jpg', 'data\\depth_track')
 # depth, _ = Midas.get_depth_array_from_json('data\\depth_track\\test000001.json')
 
@@ -22,6 +23,13 @@ x, z = np.meshgrid(x,z)
 fig = plt.figure(figsize=(12, 6))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(x, z, y, cmap='viridis')
+
+# Multiply ticks by 100
+def multiply_ticks_by_const(tick_value, pos):
+    return f'{tick_value * 100:.0f}'
+
+ax.xaxis.set_major_formatter(FuncFormatter(multiply_ticks_by_const))
+ax.zaxis.set_major_formatter(FuncFormatter(multiply_ticks_by_const))
 ax.set_xlabel('x_img')
 ax.set_ylabel('depth')
 ax.set_zlabel('y_img')
@@ -29,4 +37,5 @@ ax.set_title('Depth representation')
 ax.legend()
 
 plt.show(block=True)
+
 
