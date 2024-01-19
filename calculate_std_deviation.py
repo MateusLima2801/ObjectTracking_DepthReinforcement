@@ -4,8 +4,8 @@ import json
 from src.utils import file_separator
 
 SOURCE_FOLDER = os.path.join('data','VisDrone2019-MOT-test-dev')
-calcs: list[DeviationCalculator] = [ PositionDeviationCalculator(SOURCE_FOLDER), FeatureDeviationCalculator(SOURCE_FOLDER),DepthDeviationCalculator(SOURCE_FOLDER), ShapeDeviationCalculator(SOURCE_FOLDER)]
-metrics = ["position","feature","depth","shape"]
+calcs: list[DeviationCalculator] = [ PositionDeviationCalculator(SOURCE_FOLDER), FeatureDeviationCalculator(SOURCE_FOLDER),DepthDeviationCalculator(SOURCE_FOLDER), ShapeDeviationCalculator(SOURCE_FOLDER), DepthDeviationCalculator(SOURCE_FOLDER)]
+metrics = ["position","feature","depth","shape", "depth-distribution"]
 deviation_file = os.path.join("data","standard_deviations.json")
 sequences = [ seq.split('.')[0].split(file_separator())[-1] for seq in os.listdir(os.path.join(calcs[0].source_folder, calcs[0].annotations))]
 content: dict[dict[str,float]]
