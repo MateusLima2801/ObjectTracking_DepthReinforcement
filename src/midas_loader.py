@@ -77,19 +77,22 @@ class Midas:
     
     def try_get_or_create_depth_array(self, img: np.ndarray, img_name: str, repository_folder: str) -> np.ndarray:
         json_path = os.path.join(repository_folder, f'{img_name.split(".")[0]}.json')
-        
-        if os.path.isfile(json_path):
-            f = open(json_path)
-            content = json.load(f)
-            f.close()
-            return np.array(content['depth-array'])
-        else:
-            depth_array = self.get_depth_array(img)
-            content = { 'depth-array': depth_array.tolist()}
-            f = open(json_path, "w")
-            json.dump(content, f)
-            f.close()
-            return depth_array
+
+        try:
+            if os.path.isfile(json_path):
+                f = open(json_path)
+                content = json.load(f)
+                f.close()
+                return np.array(content['depth-array'])
+        except Exception:
+            print(f"Error loading {json_path}")
+
+        depth_array = self.get_depth_array(img)
+        content = { 'depth-array': depth_array.tolist()}
+        f = open(json_path, "w")
+        json.dump(content, f)
+        f.close()
+        return depth_array
             
             
 # m = Midas()
