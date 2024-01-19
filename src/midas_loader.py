@@ -95,5 +95,13 @@ class Midas:
         return depth_array
             
             
+    @staticmethod
+    def get_depth_array_from_json(json_path):
+        if os.path.isfile(json_path):
+            f = open(json_path)
+            content = json.load(f)
+            f.close()
+            return np.array(content['depth-array']), True
+        else: return None, False
 # m = Midas()
 # m.transform_img('data\\VisDrone2019-MOT-test-dev\\sequences\\uav0000297_02761_v\\0000001.jpg', 'demo')

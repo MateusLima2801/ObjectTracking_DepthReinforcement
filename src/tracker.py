@@ -25,11 +25,12 @@ class Tracker:
         output_folder = Tracker.create_output_folder(source_folder)
         
         sequence_name = source_folder.split(utils.file_separator())[-1]
-        depth_source_folder = os.path.join(depth_base_folder, sequence_name)
-        os.makedirs(depth_base_folder, exist_ok=True)
-        if f'{sequence_name}.tar.gz' in os.listdir(depth_base_folder):
-            utils.decompress_file(os.path.join(depth_base_folder,f'{sequence_name}.tar.gz'), depth_source_folder)
-        else: os.makedirs(depth_source_folder, exist_ok=True)
+        if weights[2] > 0 or weights[4] > 0:
+            depth_source_folder = os.path.join(depth_base_folder, sequence_name)
+            os.makedirs(depth_base_folder, exist_ok=True)
+            if f'{sequence_name}.tar.gz' in os.listdir(depth_base_folder):
+                utils.decompress_file(os.path.join(depth_base_folder,f'{sequence_name}.tar.gz'), depth_source_folder)
+            else: os.makedirs(depth_source_folder, exist_ok=True)
         
         if max_idx is not None:
             img_names = img_names[:max_idx]
@@ -77,13 +78,16 @@ class Tracker:
             lf = cf
             bar.next()
         suppression.end_time_count()
-        utils.compress_folder(depth_source_folder)
-        shutil.rmtree(depth_source_folder)
+        if weights[2] > 0 or weights[4] > 0:
+            utils.compress_folder(depth_source_folder)
+            shutil.rmtree(depth_source_folder)
         utils.turn_imgs_into_video(os.path.join(output_folder, "imgs"), output_folder.split(utils.file_separator())[-1], delete_imgs=delete_imgs, fps=fps)
         
         if ground_truth_filepath != None:
             metrics = MOT_Evaluator.evaluate_annotations_result(os.path.join(output_folder,'annotations.txt'), ground_truth_filepath, max_idx)
             MOT_Evaluator.save_results_to_file(os.path.join(output_folder, "results.txt"), metrics, weights, conf, suppression, std_deviations, self.matcher.matchers, max_idx)
+            return metrics
+        return None
     
     @staticmethod
     def create_output_folder(source_folder: str)  -> str:

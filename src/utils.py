@@ -107,6 +107,10 @@ def decompress_file(file: str, output_folder: str) -> bool:
     
     return False
 
+def safely_divide(first, second):
+    if second  == 0: return 0
+    else: return first/second
+     
 def wrap_cmd(cmd: str):
     sys = system()
     if "Linux" in sys or "Darwin" in sys:

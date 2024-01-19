@@ -12,9 +12,7 @@ def main():
     SEQUENCE_FOLDER = os.path.join(SEQUENCES_FOLDER, SEQUENCE)
     DEPTH_SEQUENCE_FOLDER = os.path.join('data', 'depth_track')
     # [FEATURE, POSITION, DEPTH, SHAPE, DEPTH_DISTRIBUTION]
-    weights = [[1,1,0,1,0],[1,1,1,1,0]]
-    ponderated_weights = [0.5, 0.15, 0.2, 0.15, 0.2]
-    weights = [[w*ponderated_weights[i] for i, w in enumerate(w1)] for w1 in weights]
+    weights = [[1,1,0,1,0]]
     supp = [Confluence()]
     matcher = Hungarian_Matching()
     midas = None
