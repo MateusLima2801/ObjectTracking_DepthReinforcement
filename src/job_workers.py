@@ -26,7 +26,7 @@ class JobWorkers():
         while True:
             item = self.queue.get()
             if self.print:
-                print(f'Working item: {item}')
+                print(f'\nWorking item: {item}')
             self.func(item, self.args) 
             self.queue.task_done()
 

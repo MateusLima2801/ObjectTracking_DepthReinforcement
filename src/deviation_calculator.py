@@ -4,6 +4,7 @@ import os
 import shutil
 import numpy as np
 import json
+from tqdm import tqdm
 from src.matchers.depth_distribution_matcher import Depth_Distribution_Matcher
 from src.matchers.feature_matcher import Feature_Matcher
 from src.job_workers import JobWorkers
@@ -202,11 +203,13 @@ class Feature_Deviation_Calculator(Deviation_Calculator):
         return des[0]
     
 class Depth_Distribution_Deviation_Calculator(Deviation_Calculator):
-    def __init__(self, source_folder: str, depth_base_folder, matcher: Depth_Distribution_Matcher, midas: Midas):
+    def __init__(self, source_folder: str, depth_base_folder, matcher: Depth_Distribution_Matcher, midas: Midas, max_idx: int = None, compress: bool = True):
         super().__init__(source_folder)
         self.midas = midas
         self.depth_base_folder = depth_base_folder
         self.matcher = matcher
+        self.max_idx = max_idx
+        self.compress = compress
         
     def calculate_for_a_sequence(self, sequence: str) -> float:
         lines = self.read_sequence_annotations(sequence)
@@ -227,11 +230,15 @@ class Depth_Distribution_Deviation_Calculator(Deviation_Calculator):
         img_source = os.path.join(self.source_folder, self.sequences, sequence)
         img_names = utils.get_filenames_from(img_source, 'jpg')
 
+        if self.max_idx != None:
+            maximum = min(len(img_names), self.max_idx)
+            img_names = img_names[:maximum]
+
         square_sum = 0
         counter = 0
-        bar = Bar("Processing frames...", max=len(img_names))
+        bar = tqdm(total=len(img_names))
         lf: Frame = None
-        for name in img_names:
+        for i, name in enumerate(img_names):
             img = utils.get_img_from_file(os.path.join(img_source, name))
             depth_array = self.midas.try_get_or_create_depth_array(img, name, depth_source_folder )
             f_id = utils.get_number_from_filename(name)
@@ -242,7 +249,9 @@ class Depth_Distribution_Deviation_Calculator(Deviation_Calculator):
             
             if lf == None:
                 lf = cf
-                bar.next()
+                bar.update(1)
+                bar.set_postfix({f"Process frame from {sequence}": i + 1})
+                bar.refresh()
                 continue
             
             for last_bb in lf.bboxes:
@@ -252,10 +261,14 @@ class Depth_Distribution_Deviation_Calculator(Deviation_Calculator):
                         square_sum += (distance)**2 
                         counter +=1
                         break
+            print(f'Partial Mean: {math.sqrt(square_sum / counter) * scale}')
             lf = cf
-            bar.next()
+            bar.update(1)
+            bar.set_postfix({f"Process frame from {sequence}": i + 1})
+            bar.refresh()
         
-        utils.compress_folder(depth_source_folder)
+        if self.compress:
+            utils.compress_folder(depth_source_folder)
         shutil.rmtree(depth_source_folder)
         
         return math.sqrt(square_sum / counter) * scale

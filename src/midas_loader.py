@@ -84,8 +84,8 @@ class Midas:
                 content = json.load(f)
                 f.close()
                 return np.array(content['depth-array'])
-        except Exception:
-            print(f"Error loading {json_path}")
+        except Exception as e:
+            print(f"\nError loading {json_path}: {e}")
 
         depth_array = self.get_depth_array(img)
         content = { 'depth-array': depth_array.tolist()}

@@ -14,12 +14,14 @@ calcs: list[Deviation_Calculator] = [ Position_Deviation_Calculator(SOURCE_FOLDE
                                       Feature_Deviation_Calculator(SOURCE_FOLDER),
                                       Depth_Deviation_Calculator(SOURCE_FOLDER, midas),
                                       Shape_Deviation_Calculator(SOURCE_FOLDER),
-                                      Depth_Distribution_Deviation_Calculator(SOURCE_FOLDER, DEPTH_SEQUENCE_FOLDER, Depth_Distribution_KL_Matcher(), midas)]
+                                      Depth_Distribution_Deviation_Calculator(SOURCE_FOLDER, DEPTH_SEQUENCE_FOLDER,
+                                                                              Depth_Distribution_KL_Matcher(),
+                                                                              midas, 100, False)]
 metrics = ["position","feature","depth","shape", "depth-distribution-KL"]
 deviation_file = os.path.join("data","standard_deviations.json")
 sequences = [ seq.split('.')[0].split(file_separator())[-1] for seq in os.listdir(os.path.join(calcs[0].source_folder, calcs[0].annotations))]
 content: dict[dict[str,float]]
-test_sequences = ['uav0000009_03358_v','uav0000077_00720_v', 'uav0000120_04775_v', 'uav0000201_00000_v', 'uav0000297_02761_v', 'uav0000119_02301_v']
+test_sequences = ['uav0000009_03358_v','uav0000120_04775_v','uav0000077_00720_v', 'uav0000201_00000_v', 'uav0000297_02761_v', 'uav0000119_02301_v']
 lock = threading.Lock()
 seq_queue = Queue()
 
@@ -37,8 +39,8 @@ def iterate_a_sequence(seq: str, args):
     if seq not in test_sequences:
             depth_file = os.path.join('data', 'depth_track', f'{seq}.tar.gz')
             if os.path.isfile(depth_file):
-                shutil.rmtree(depth_file)
-    
+                os.remove(depth_file)
+
 for seq in test_sequences:
     sequences.remove(seq)
 sequences = test_sequences + sequences
@@ -65,7 +67,7 @@ for i, calc in enumerate(calcs):
             if content['standard-deviations'][seq][metrics[i]] == None:
                 seq_queue.put(seq)
             else: bar.next()
-        job = JobWorkers(seq_queue, iterate_a_sequence, 2, False, content, metrics, deviation_file, bar, test_sequences)
+        job = JobWorkers(seq_queue, iterate_a_sequence, 1, False, content, metrics, deviation_file, bar, test_sequences)
         for seq in sequences:
             sum += content['standard-deviations'][seq][metrics[i]]
         mean = sum /len(sequences)
