@@ -22,6 +22,7 @@ content: dict[dict[str,float]]
 test_sequences = ['uav0000009_03358_v','uav0000077_00720_v', 'uav0000120_04775_v', 'uav0000201_00000_v', 'uav0000297_02761_v', 'uav0000119_02301_v']
 lock = threading.Lock()
 seq_queue = Queue()
+
 def iterate_a_sequence(seq: str, args):
     content, metrics, deviation_file, bar = args
     std = calc.calculate_for_a_sequence(seq)
@@ -34,6 +35,10 @@ def iterate_a_sequence(seq: str, args):
     bar.next()
     lock.release()
     
+for seq in test_sequences:
+    sequences.remove(seq)
+sequences = test_sequences + sequences
+
 if not os.path.isfile(deviation_file):
     content = {"standard-deviations": {},
                "mean-standard-deviations": {}}
@@ -49,12 +54,14 @@ for i, calc in enumerate(calcs):
         content['mean-standard-deviations'][metrics[i]] = None
     if content['mean-standard-deviations'][metrics[i]] == None:
         sum = 0
+        bar = Bar(f"Processing std for {metrics[i]}...", max = len(sequences))
         for seq in sequences:
             if metrics[i] not in content['standard-deviations'][seq].keys():
                 content['standard-deviations'][seq][metrics[i]] = None
             if content['standard-deviations'][seq][metrics[i]] == None:
                 seq_queue.put(seq)
-        job = JobWorkers(seq_queue, iterate_a_sequence, 2, False, content, metrics, deviation_file)
+            else: bar.next()
+        job = JobWorkers(seq_queue, iterate_a_sequence, 2, False, content, metrics, deviation_file, bar)
         for seq in sequences:
             sum += content['standard-deviations'][seq][metrics[i]]
         mean = sum /len(seq)
@@ -62,9 +69,11 @@ for i, calc in enumerate(calcs):
         content['mean-standard-deviations'][metrics[i]] = mean
         f = open(deviation_file, "w")
         json.dump(content, f)
+        f.close()
+        
         if seq not in test_sequences:
             depth_file = os.path.join('data', 'depth_track', f'{seq}.tar.gz')
             if os.path.isfile(depth_file):
                 shutil.rmtree(depth_file)
-        f.close()
+        
 
