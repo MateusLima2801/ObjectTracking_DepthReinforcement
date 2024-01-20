@@ -17,6 +17,7 @@ deviation_file = os.path.join("data","standard_deviations.json")
 sequences = [ seq.split('.')[0].split(file_separator())[-1] for seq in os.listdir(os.path.join(calcs[0].source_folder, calcs[0].annotations))]
 content: dict[dict[str,float]]
 test_sequences = ['uav0000009_03358_v','uav0000077_00720_v', 'uav0000120_04775_v', 'uav0000201_00000_v', 'uav0000297_02761_v', 'uav0000119_02301_v']
+sequences = test_sequences + sequences
 
 if not os.path.isfile(deviation_file):
     content = {"standard-deviations": {},
@@ -33,6 +34,7 @@ for i, calc in enumerate(calcs):
         content['mean-standard-deviations'][metrics[i]] = None
     if content['mean-standard-deviations'][metrics[i]] == None:
         sum = 0
+        bar = Bar(f"Processing std for {metrics[i]}...", max = len(sequences))
         for seq in sequences:
             if metrics[i] not in content['standard-deviations'][seq].keys():
                 content['standard-deviations'][seq][metrics[i]] = None
@@ -44,6 +46,7 @@ for i, calc in enumerate(calcs):
                 json.dump(content, f)
                 f.close()
             sum += content['standard-deviations'][seq][metrics[i]]
+            bar.next()
         mean = sum /len(seq)
         print(f'Mean Standard Deviation: {mean}')
         content['mean-standard-deviations'][metrics[i]] = mean
