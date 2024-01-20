@@ -4,6 +4,7 @@ import os
 import shutil
 import numpy as np
 import json
+from src.matchers.depth_distribution_matcher import Depth_Distribution_Matcher
 from src.matchers.feature_matcher import Feature_Matcher
 from src.job_workers import JobWorkers
 from src.frame import Frame
@@ -13,7 +14,7 @@ import src.utils as utils
 from progress.bar import Bar
 from queue import Queue
 
-class DeviationCalculator():
+class Deviation_Calculator():
     annotations = "annotations"
     sequences = "sequences"
 
@@ -35,9 +36,9 @@ class DeviationCalculator():
     def calculate_for_a_sequence(self, sequence: str) -> float:
         raise NotImplementedError
     
-    def create_bounding_box(self, line: str) -> BoundingBox  | float:
+    def create_bounding_box(self, line: str, depth_array: np.ndarray = None) -> BoundingBox  | float:
         info = utils.cast_list(line.replace('\n', '').split(','), int)
-        return BoundingBox(int((info[2]+info[4])/2), int((info[3]+info[5])/2), info[4], info[5], 1, id=info[1]), info[0]
+        return BoundingBox(int((info[2]+info[4])/2), int((info[3]+info[5])/2), info[4], info[5], conf = 1, depth_array=depth_array, id=info[1]), info[0]
 
     def read_sequence_annotations(self, sequence: str):
         annotations_file_path = os.path.join(self.source_folder, self.annotations, sequence + '.txt')
@@ -46,7 +47,7 @@ class DeviationCalculator():
         f.close()
         return lines
     
-class PositionDeviationCalculator(DeviationCalculator):
+class Position_Deviation_Calculator(Deviation_Calculator):
 
     def calculate_for_a_sequence(self, sequence: str) -> float:
         lines = self.read_sequence_annotations(sequence)
@@ -65,7 +66,7 @@ class PositionDeviationCalculator(DeviationCalculator):
 
         return math.sqrt(square_sum / counter)
 
-class ShapeDeviationCalculator(DeviationCalculator):
+class Shape_Deviation_Calculator(Deviation_Calculator):
 
     def calculate_for_a_sequence(self, sequence: str) -> float:
         lines = self.read_sequence_annotations(sequence)
@@ -86,11 +87,11 @@ class ShapeDeviationCalculator(DeviationCalculator):
 
         return math.sqrt(square_sum / counter)
     
-class DepthDeviationCalculator(DeviationCalculator):
+class Depth_Deviation_Calculator(Deviation_Calculator):
     depth_annotations = "depth_annotations"
-    def __init__(self, source_folder: str):
+    def __init__(self, source_folder: str, midas: Midas):
         super().__init__(source_folder)
-        self.midas = Midas()
+        self.midas = midas
         self.depth_folder = os.path.join(self.source_folder,self.depth_annotations)
 
     def calculate_for_a_sequence(self, sequence: str) -> float:
@@ -167,9 +168,8 @@ class DepthDeviationCalculator(DeviationCalculator):
         data = json.load(f)
         f.close()
         return data['bboxes_depth']
-    
 
-class FeatureDeviationCalculator(DeviationCalculator):
+class Feature_Deviation_Calculator(Deviation_Calculator):
     def __init__(self, source_folder: str):
         super().__init__(source_folder)
         self.matcher = Feature_Matcher()
@@ -201,3 +201,61 @@ class FeatureDeviationCalculator(DeviationCalculator):
         _, des = self.matcher.detect_keypoints(mask)
         return des[0]
     
+class Depth_Distribution_Deviation_Calculator(Deviation_Calculator):
+    def __init__(self, source_folder: str, depth_base_folder, matcher: Depth_Distribution_Matcher, midas: Midas):
+        super().__init__(source_folder)
+        self.midas = midas
+        self.depth_base_folder = depth_base_folder
+        self.matcher = matcher
+        
+    def calculate_for_a_sequence(self, sequence: str) -> float:
+        lines = self.read_sequence_annotations(sequence)
+        lines_by_frame: dict[int, list[str]] = {}
+        depth_source_folder = os.path.join(self.depth_base_folder, sequence)
+        scale = 1000
+        for line in lines:
+            f_id = int(line.split(',')[0])
+            if f_id not in lines_by_frame.keys():
+                lines_by_frame[f_id] = []
+            lines_by_frame[f_id].append(line)
+            
+        os.makedirs(self.depth_base_folder, exist_ok=True)
+        if f'{sequence}.tar.gz' in os.listdir(self.depth_base_folder):
+            utils.decompress_file(os.path.join(self.depth_base_folder,f'{sequence}.tar.gz'), depth_source_folder)
+        else: os.makedirs(depth_source_folder, exist_ok=True)
+            
+        img_source = os.path.join(self.source_folder, self.sequences, sequence)
+        img_names = utils.get_filenames_from(img_source, 'jpg')
+
+        square_sum = 0
+        counter = 0
+        bar = Bar("Processing frames...", max=len(img_names))
+        lf: Frame = None
+        for name in img_names:
+            img = utils.get_img_from_file(os.path.join(img_source, name))
+            depth_array = self.midas.try_get_or_create_depth_array(img, name, depth_source_folder )
+            f_id = utils.get_number_from_filename(name)
+            cf = Frame(f_id, None, None,depth_array)
+            for line in lines_by_frame[f_id]:
+                bb, _ = self.create_bounding_box(line, depth_array)
+                cf.bboxes.append(bb)
+            
+            if lf == None:
+                lf = cf
+                bar.next()
+                continue
+            
+            for last_bb in lf.bboxes:
+                for bb in cf.bboxes:
+                    if last_bb.id == bb.id:
+                        distance = self.matcher.calculate_distance(last_bb.depth_array, bb.depth_array) / scale
+                        square_sum += (distance)**2 
+                        counter +=1
+                        break
+            lf = cf
+            bar.next()
+        
+        utils.compress_folder(depth_source_folder)
+        shutil.rmtree(depth_source_folder)
+        
+        return math.sqrt(square_sum / counter) * scale

@@ -38,7 +38,7 @@ class Tracker:
         suppression.init_time_count()
         for name in img_names:
             img_path = os.path.join(source_folder, name)
-            img = Tracker.get_img_tensor(source_folder, name)
+            img = utils.get_img_from_file(img_path)
             detection_labels = self.detector.detect_and_read_labels(img_path, conf)
             if len(detection_labels) <= 0: continue
             depth_array = np.zeros((img.shape[0], img.shape[1], 1))
@@ -101,7 +101,3 @@ class Tracker:
             if 10 ** dig_len <= i: dig_len+=1
         os.makedirs(os.path.join(output_folder, "imgs"), exist_ok = True)
         return output_folder
-
-    @staticmethod
-    def get_img_tensor(source_folder:str, name:str):
-        return utils.get_img_from_file(os.path.join(source_folder, name))

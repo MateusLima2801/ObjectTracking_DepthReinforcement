@@ -1,7 +1,7 @@
 
 import numpy as np
 import scipy.optimize as opt
-from src.matchers.depth_distribution_matcher import Depth_Distribution_Matcher
+from src.matchers.depth_distribution_matcher import Depth_Distribution_Matcher, Depth_Distribution_KL_Matcher
 from src.matchers.depth_matcher import Depth_Matcher
 from src.matchers.feature_matcher import Feature_Matcher
 from src.matchers.position_matcher import Position_Matcher
@@ -11,7 +11,7 @@ from src.frame import Frame
 
 class Hungarian_Matching():
     def __init__(self):
-        self.matchers: list[Matcher] = [Feature_Matcher(), Position_Matcher, Depth_Matcher, Shape_Matcher, Depth_Distribution_Matcher]
+        self.matchers: list[Matcher] = [Feature_Matcher(), Position_Matcher, Depth_Matcher, Shape_Matcher, Depth_Distribution_KL_Matcher()]
 
     def generate_cost_matrix(self,fr1: Frame, fr2: Frame, weights: list[float], std_deviations: list[float]):
         cost = np.zeros((len(fr1.bboxes), len(fr2.bboxes)))

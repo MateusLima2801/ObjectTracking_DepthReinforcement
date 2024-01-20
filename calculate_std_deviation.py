@@ -1,11 +1,18 @@
+from src.matchers.depth_distribution_matcher import Depth_Distribution_KL_Matcher
 from src.deviation_calculator import *
 import os
 import json
 from src.utils import file_separator
 
 SOURCE_FOLDER = os.path.join('data','VisDrone2019-MOT-test-dev')
-calcs: list[DeviationCalculator] = [ PositionDeviationCalculator(SOURCE_FOLDER), FeatureDeviationCalculator(SOURCE_FOLDER),DepthDeviationCalculator(SOURCE_FOLDER), ShapeDeviationCalculator(SOURCE_FOLDER), DepthDeviationCalculator(SOURCE_FOLDER)]
-metrics = ["position","feature","depth","shape", "depth-distribution"]
+DEPTH_SEQUENCE_FOLDER = os.path.join('data', 'depth_track')
+midas = Midas()
+calcs: list[Deviation_Calculator] = [ Position_Deviation_Calculator(SOURCE_FOLDER),
+                                      Feature_Deviation_Calculator(SOURCE_FOLDER),
+                                      Depth_Deviation_Calculator(SOURCE_FOLDER, midas),
+                                      Shape_Deviation_Calculator(SOURCE_FOLDER),
+                                      Depth_Distribution_Deviation_Calculator(SOURCE_FOLDER, DEPTH_SEQUENCE_FOLDER, Depth_Distribution_KL_Matcher(), midas)]
+metrics = ["position","feature","depth","shape", "depth-distribution-KL"]
 deviation_file = os.path.join("data","standard_deviations.json")
 sequences = [ seq.split('.')[0].split(file_separator())[-1] for seq in os.listdir(os.path.join(calcs[0].source_folder, calcs[0].annotations))]
 content: dict[dict[str,float]]

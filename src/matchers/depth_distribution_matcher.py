@@ -8,26 +8,23 @@ from src.matchers.matcher import Matcher
 
 class Depth_Distribution_Matcher(Matcher):
     matcher_type: str = "Depth Distribution"
-    epsilon = 1e-10
-    
-    @staticmethod
-    def generate_cost_matrix(f1: Frame, f2: Frame, normalize: bool = False):
+   
+    def generate_cost_matrix(self, f1: Frame, f2: Frame, normalize: bool = False):
         cost = np.zeros((len(f1.bboxes), len(f2.bboxes)))
         rows = len(cost)
         cols = len(cost[0])
         for i in range(rows):
             for j in range(cols):
-                cost[i,j] = Depth_Distribution_Matcher.calculate_distance(f1.bboxes[i].depth_array,f2.bboxes[j].depth_array)
+                cost[i,j] = self.calculate_distance(f1.bboxes[i].depth_array,f2.bboxes[j].depth_array)
         
         if normalize: return utils.normalize_array(cost)
         else: return cost
-    
-    @staticmethod
-    def calculate_distance(depth_arr1, depth_arr2):
+
+    def calculate_distance(self, depth_arr1, depth_arr2):
         maximum = max(depth_arr1.shape[0], depth_arr1.shape[1], depth_arr2.shape[0], depth_arr2.shape[1])
         arr1 = Depth_Distribution_Matcher.reescale_depth_array(depth_arr1, maximum)
         arr2 = Depth_Distribution_Matcher.reescale_depth_array(depth_arr2, maximum)
-        return Depth_Distribution_Matcher.calculate_KL_divergence(arr1, arr2)
+        return self.do_calculate_distance(arr1, arr2)
     
     @staticmethod
     def reescale_depth_array(arr: np.ndarray, mesh_side: int):
@@ -47,8 +44,13 @@ class Depth_Distribution_Matcher(Matcher):
         interpolated_values[interpolated_values<0] = 0
         return interpolated_values
     
-    @staticmethod
-    def calculate_EMD_distance(arr1, arr2):
+    def do_calculate_distance(self, arr1: np.ndarray, arr2: np.ndarray) -> float:
+        raise NotImplementedError
+    
+class Depth_Distribution_EMD_Matcher(Depth_Distribution_Matcher):
+    matcher_type: str = "Depth Distribution (EMD)"
+    
+    def do_calculate_distance(self, arr1: np.ndarray, arr2: np.ndarray) -> float:
         # Flatten the 2D arrays to 1D arrays
         arr1_flat = arr1.flatten()
         arr2_flat = arr2.flatten()
@@ -56,12 +58,16 @@ class Depth_Distribution_Matcher(Matcher):
         # Compute the Earth Mover's Distance
         return wasserstein_distance(arr1_flat, arr2_flat)
     
-    @staticmethod
-    def calculate_KL_divergence(arr1: np.ndarray, arr2:np.ndarray):
+class Depth_Distribution_KL_Matcher(Depth_Distribution_Matcher):
+    matcher_type: str = "Depth Distribution (KL)"
+    epsilon = 1e-10
+    
+    def do_calculate_distance(self, arr1: np.ndarray, arr2:np.ndarray) -> float:
         # Avoiding division by zero by adding a small epsilon
         # Calculating KL Divergence
+        mat = arr1
         try:
-            mat = arr1 * np.log((arr1 + Depth_Distribution_Matcher.epsilon) / (arr2 + Depth_Distribution_Matcher.epsilon))
+            mat = mat * np.log((arr1 + self.epsilon) / (arr2 + self.epsilon))
             div = abs(np.sum(mat))
         except:
             for i,line in enumerate(mat):
