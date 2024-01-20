@@ -24,7 +24,7 @@ lock = threading.Lock()
 seq_queue = Queue()
 
 def iterate_a_sequence(seq: str, args):
-    content, metrics, deviation_file, bar = args
+    content, metrics, deviation_file, bar, test_sequences = args
     std = 1# calc.calculate_for_a_sequence(seq)
     print(f'Sequence {seq} - Standard Deviation: {std}')
     lock.acquire()
@@ -34,6 +34,10 @@ def iterate_a_sequence(seq: str, args):
     f.close()
     bar.next()
     lock.release()
+    if seq not in test_sequences:
+            depth_file = os.path.join('data', 'depth_track', f'{seq}.tar.gz')
+            if os.path.isfile(depth_file):
+                shutil.rmtree(depth_file)
     
 for seq in test_sequences:
     sequences.remove(seq)
@@ -61,7 +65,7 @@ for i, calc in enumerate(calcs):
             if content['standard-deviations'][seq][metrics[i]] == None:
                 seq_queue.put(seq)
             else: bar.next()
-        job = JobWorkers(seq_queue, iterate_a_sequence, 2, False, content, metrics, deviation_file, bar)
+        job = JobWorkers(seq_queue, iterate_a_sequence, 2, False, content, metrics, deviation_file, bar, test_sequences)
         for seq in sequences:
             sum += content['standard-deviations'][seq][metrics[i]]
         mean = sum /len(sequences)
@@ -70,10 +74,3 @@ for i, calc in enumerate(calcs):
         f = open(deviation_file, "w")
         json.dump(content, f)
         f.close()
-        
-        if seq not in test_sequences:
-            depth_file = os.path.join('data', 'depth_track', f'{seq}.tar.gz')
-            if os.path.isfile(depth_file):
-                shutil.rmtree(depth_file)
-        
-
