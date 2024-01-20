@@ -6,6 +6,7 @@ from src.frame import Frame
 from src.midas_loader import Midas
 from progress.bar import Bar
 from src.suppression import *
+from tqdm import tqdm
 import src.utils as utils
 import os
 import numpy as np
@@ -34,7 +35,7 @@ class Tracker:
         
         if max_idx is not None:
             img_names = img_names[:max_idx]
-        bar = Bar("Tracking through...", max = len(img_names))
+        bar = tqdm(total=len(img_names))
         suppression.init_time_count()
         for name in img_names:
             img_path = os.path.join(source_folder, name)
@@ -56,6 +57,9 @@ class Tracker:
                     cf.bboxes[i].id = i
                 cf.save_frame_and_bboxes_with_id(output_folder, name)
                 lf = cf
+                bar.update(1)
+                bar.set_postfix({sequence_name: id})
+                bar.refresh()
                 continue
 
             cf.crop_masks()
@@ -76,7 +80,9 @@ class Tracker:
 
             cf.save_frame_and_bboxes_with_id(output_folder, name)
             lf = cf
-            bar.next()
+            bar.update(1)
+            bar.set_postfix({sequence_name: id})
+            bar.refresh()
         suppression.end_time_count()
         if weights[2] > 0 or weights[4] > 0:
             utils.compress_folder(depth_source_folder)
