@@ -25,7 +25,7 @@ seq_queue = Queue()
 
 def iterate_a_sequence(seq: str, args):
     content, metrics, deviation_file, bar = args
-    std = calc.calculate_for_a_sequence(seq)
+    std = 1# calc.calculate_for_a_sequence(seq)
     print(f'Sequence {seq} - Standard Deviation: {std}')
     lock.acquire()
     content['standard-deviations'][seq][metrics[i]] = std
@@ -64,7 +64,7 @@ for i, calc in enumerate(calcs):
         job = JobWorkers(seq_queue, iterate_a_sequence, 2, False, content, metrics, deviation_file, bar)
         for seq in sequences:
             sum += content['standard-deviations'][seq][metrics[i]]
-        mean = sum /len(seq)
+        mean = sum /len(sequences)
         print(f'Mean Standard Deviation: {mean}')
         content['mean-standard-deviations'][metrics[i]] = mean
         f = open(deviation_file, "w")
