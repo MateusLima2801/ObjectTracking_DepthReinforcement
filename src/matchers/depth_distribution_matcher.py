@@ -1,5 +1,4 @@
 import numpy as np
-from tabulate import tabulate
 import src.utils as utils
 from src.frame import Frame
 from scipy.interpolate import RegularGridInterpolator

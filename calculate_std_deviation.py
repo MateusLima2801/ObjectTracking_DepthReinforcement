@@ -16,6 +16,7 @@ metrics = ["position","feature","depth","shape", "depth-distribution-KL"]
 deviation_file = os.path.join("data","standard_deviations.json")
 sequences = [ seq.split('.')[0].split(file_separator())[-1] for seq in os.listdir(os.path.join(calcs[0].source_folder, calcs[0].annotations))]
 content: dict[dict[str,float]]
+test_sequences = ['uav0000009_03358_v','uav0000077_00720_v', 'uav0000120_04775_v', 'uav0000201_00000_v', 'uav0000297_02761_v', 'uav0000119_02301_v']
 
 if not os.path.isfile(deviation_file):
     content = {"standard-deviations": {},
@@ -48,4 +49,8 @@ for i, calc in enumerate(calcs):
         content['mean-standard-deviations'][metrics[i]] = mean
         f = open(deviation_file, "w")
         json.dump(content, f)
+        if seq not in test_sequences:
+            depth_file = os.path.join('data', 'depth_track', f'{seq}.tar.gz')
+            if os.path.isfile(depth_file):
+                shutil.rmtree(depth_file)
         f.close()
