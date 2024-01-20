@@ -8,8 +8,6 @@ from src.suppression import *
 
 def main():
     SEQUENCES_FOLDER = os.path.join('data','VisDrone2019-MOT-test-dev','sequences')
-    SEQUENCE = 'uav0000297_02761_v'
-    SEQUENCE_FOLDER = os.path.join(SEQUENCES_FOLDER, SEQUENCE)
     DEPTH_SEQUENCE_FOLDER = os.path.join('data', 'depth_track')
     # [FEATURE, POSITION, DEPTH, SHAPE, DEPTH_DISTRIBUTION]
     weights = [[1,1,0,1,1]]
