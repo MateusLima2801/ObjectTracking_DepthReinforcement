@@ -7,6 +7,13 @@ from src.job_workers import JobWorkers
 from src.suppression import *
 from queue import Queue
 
+def wraptrack(elmt, args):
+    seq,w,sup =elmt
+    tracker, SEQUENCES_FOLDER, DEPTH_SEQUENCE_FOLDER, STD_DEVIATIONS = args
+    ground_truth_filepath = os.path.join('data','VisDrone2019-MOT-test-dev','annotations', f'{seq}.txt')
+    seq_path = os.path.join(SEQUENCES_FOLDER, seq)
+    tracker.track(seq_path,DEPTH_SEQUENCE_FOLDER,fps=10, max_idx=400,delete_imgs=True,weights=w,ground_truth_filepath=ground_truth_filepath, conf=0.35, suppression=sup, std_deviations = STD_DEVIATIONS)
+
 def main():
     SEQUENCES_FOLDER = os.path.join('data','VisDrone2019-MOT-test-dev','sequences')
     DEPTH_SEQUENCE_FOLDER = os.path.join('data', 'depth_track')
