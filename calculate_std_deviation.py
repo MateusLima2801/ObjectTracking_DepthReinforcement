@@ -25,7 +25,7 @@ seq_queue = Queue()
 
 def iterate_a_sequence(seq: str, args):
     content, metrics, deviation_file, bar, test_sequences = args
-    std = 1# calc.calculate_for_a_sequence(seq)
+    std = calc.calculate_for_a_sequence(seq)
     print(f'Sequence {seq} - Standard Deviation: {std}')
     lock.acquire()
     content['standard-deviations'][seq][metrics[i]] = std
