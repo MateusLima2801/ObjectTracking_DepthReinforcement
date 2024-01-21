@@ -20,7 +20,8 @@ class Tracker:
 
     def track(self, source_folder:str, depth_base_folder: str, weights: list[float] = [1,1,1,1,1],
               delete_imgs:bool = True,  fps: float = 10.0, max_idx: int = None, 
-              ground_truth_filepath = None, conf = 0.6, suppression: Suppression = EmptySuppression(), std_deviations = [1,1,1,1,1]):
+              ground_truth_filepath = None, conf = 0.6, suppression: Suppression = EmptySuppression(), std_deviations = [1,1,1,1,1],
+              decompress= True):
         lf: Frame = None
         img_names = utils.get_filenames_from(source_folder, 'jpg')
         output_folder = Tracker.create_output_folder(source_folder)
@@ -29,9 +30,9 @@ class Tracker:
         if weights[2] > 0 or weights[4] > 0:
             depth_source_folder = os.path.join(depth_base_folder, sequence_name)
             os.makedirs(depth_base_folder, exist_ok=True)
-            if f'{sequence_name}.tar.gz' in os.listdir(depth_base_folder):
+            if f'{sequence_name}.tar.gz' in os.listdir(depth_base_folder) and decompress:
                 utils.decompress_file(os.path.join(depth_base_folder,f'{sequence_name}.tar.gz'), depth_source_folder)
-            else: os.makedirs(depth_source_folder, exist_ok=True)
+            os.makedirs(depth_source_folder, exist_ok=True)
         
         if max_idx is not None:
             img_names = img_names[:max_idx]

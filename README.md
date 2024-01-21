@@ -107,7 +107,8 @@ For the depth and position, centroid metric will be used as reference to compare
 - dealing with distant objects overlapped too much: threshold IOU between object and frame and filtering by depth, basing the threshold in the detections of the frame
 - create a video from the annotations data to verify (done and rectified)
 - use depth distribution in the object to analyse impact
-   - calculate std deviation for KL divergence metric(?h) and run with the 6 sequences (4h)
+   - calculate std deviation for KL divergence metric(?h) and run with the 6 sequences (4h) (done) (it's better than EMD)
+- Position improves the accuracy but it causes errors when there are brusque changes of position in camera
 
 
 ## Occlusion
