@@ -1,6 +1,6 @@
 # Framework
 
-<img src="ENPC_FRAMEWORK.jpg" width="70%" >
+<img src="ENPC_FRAMEWORK.png" width="70%" >
 
 ## Matching methods advantages
 
@@ -66,50 +66,6 @@ For the depth and position, centroid metric will be used as reference to compare
 0: person
 7: truck
 
-## Tasks
-
-= Develop single object tracking based in feature matching
-
-- generate similarity matrix for cropped images:(done)
-  - SURF - SIFT optimized
-    -SIFT (preferred) (done)
-    -siamese network (need of training the nn)
-- apply hungarian matching to cropped images (done)
-- extracting cropped detection masks(done)
-- Hungarian Matching(done)
-- Optical flow solves occlusion problem, not applying it is bad
-- use Lowe ratio test to ensure that the best match is distinguished enough of the second match (done)
-- create a video with the matches (done):
-- solve overlap bbox problem (non maximum suppression) (done)
-- add center depth (done)
-- IDEA: apply evaluation metric (iou) and train the weights over the cost_matrixes over VisDroneDataSet
-- compress track frames at end of tracking
-- apply Parallel NMS(0.6ms) instead of NMS (137ms) (done)
-- send results (done)
-- apply validation with ground truth annotations provided by VisDrone (done)
-- apply optical flow concepts
-- depth extraction could be parallelized because it doesn't depend on order:
-   - Parallelize depth estimation of images
-- do a grid for calculate hyperparameters: confiance threshold, distance threshold, tracking weights(most important analysis)
-- improve detection (change from yolo to RetinaNet model)(done) Noticed better confidence scores for the bounding boxes
-- calculate standard deviation of metrics for normalizing the cost matrixes:
-   - depth: maybe persistence method can be improved, we can persist a new txt file with depth filled for each analyzed frame. That way a smaller amount of unuseful data is stored. Something in the lines of:
-   dict = {
-      1: ['line, depth']
-   } (done) 
-   With this implementation it was observed an improvement of the CLEAR Metrics for the case in analysis
-- depth persistence: saving the whole depth array seems to cost too much memory, for accelerating the tracking algorithm one could store a scale reduced version 
-- annomalies can be dealt by using diff in shape (width and height) test with 2761 made a gigantic blob steal the id of a person 8 times smaller (done)
-   by using shape instead of having two mismatches, it passes as a false positive
-- make the code work for linux and windows (folder references) (done)
-- abolish weights, use only activation binary complements (DONE)
-- displacement doesn't work because we are trying to identificate a current bb with a previous one and the current doesn't have displacement to compare
-- dealing with distant objects overlapped too much: threshold IOU between object and frame and filtering by depth, basing the threshold in the detections of the frame
-- create a video from the annotations data to verify (done and rectified)
-- use depth distribution in the object to analyse impact
-   - calculate std deviation for KL divergence metric(?h) and run with the 6 sequences (4h)
-
-
 ## Occlusion
 - displacement can be only used with optical flow replacing position as predicted position
 - maybe if PREDICT.IOU(EVERY ONE) == 0 then create bb else do nothing
@@ -143,8 +99,6 @@ MOTA - Multi-Object Tracking Accuracy
 
 2. Bernardin, K., Stiefelhagen, R. Evaluating Multiple Object Tracking Performance: The CLEAR MOT Metrics. J Image Video Proc 2008, 246309 (2008). https://doi.org/10.1155/2008/246309
 
-3. DEPTH MAP BASED OBJECT TRACKING AND 3D POSITIONING
-FOR NON-STATIC CAMERA
 ## Links
 
 1. VisDrone: https://github.com/VisDrone/VisDrone-Dataset
