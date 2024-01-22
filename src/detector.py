@@ -1,20 +1,23 @@
-from ultralytics import YOLO
 from src.utils import *
 import torch
 from torchvision.models.detection import retinanet_resnet50_fpn, RetinaNet_ResNet50_FPN_Weights
 from torchvision.transforms import ToTensor
 from PIL import Image
+from threading import Lock
 
 class Detector():
     def __init__(self):
         self.model = retinanet_resnet50_fpn(weights=RetinaNet_ResNet50_FPN_Weights.DEFAULT).eval()
+        self.lock = Lock()
 
     def detect(self, source: str,  conf: float=0.3):
         img = Image.open(source)
         tensor = ToTensor()(img)
         batched = tensor.unsqueeze(0)
+        self.lock.acquire()
         with torch.no_grad():
             out = self.model(batched)
+        self.lock.release()
         first_out = out[0]
         bboxes = first_out['boxes'][first_out['scores']>=conf].tolist()
         scores = first_out['scores'][first_out['scores']>=conf].tolist()
