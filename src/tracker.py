@@ -31,7 +31,7 @@ class Tracker:
             os.makedirs(depth_base_folder, exist_ok=True)
             if f'{sequence_name}.tar.gz' in os.listdir(depth_base_folder):
                 utils.decompress_file(os.path.join(depth_base_folder,f'{sequence_name}.tar.gz'), depth_source_folder)
-            else: os.makedirs(depth_source_folder, exist_ok=True)
+            os.makedirs(depth_source_folder, exist_ok=True)
         
         if max_idx is not None:
             img_names = img_names[:max_idx]
