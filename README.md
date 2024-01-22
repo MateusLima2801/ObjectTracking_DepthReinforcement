@@ -1,6 +1,6 @@
 # Framework
 
-<img src="ENPC_FRAMEWORK.png" width="70%" >
+<img src="demo/ENPC_FRAMEWORK.png" width="70%" >
 
 ## Matching methods advantages
 
